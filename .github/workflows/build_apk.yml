@@ -48,15 +48,15 @@ jobs:
           name: Kisti-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Publish GitHub Release
-        run: |
-          TAG_NAME="v1.0.0"
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG_NAME="${{ github.ref_name }}"
-          fi
-          gh release create "$TAG_NAME" build/app/outputs/flutter-apk/app-release.apk \
-            --title "Kisti Seba Release $TAG_NAME" \
-            --notes "Kisti (com.kisti.seba) - Modern Futuristic Liquid Glass Microfinance & Installment App" \
-            --clobber || true
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        with:
+          name: Kisti Seba Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          files: build/app/outputs/flutter-apk/app-release.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
