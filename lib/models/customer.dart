@@ -65,20 +65,17 @@ class Customer {
       totalCollected >= installmentPrice || paidInstallments >= totalInstallments;
 
   String get categoryIcon {
-    switch (productCategory) {
-      case 'মোবাইল':
-        return '📱';
-      case 'ফ্রিজ':
-        return '🧊';
-      case 'টিভি':
-        return '📺';
-      case 'এসি':
-        return '❄️';
-      case 'বাইক':
-        return '🛵';
-      default:
-        return '📦';
-    }
+    final cat = productCategory.toLowerCase();
+    if (cat.contains('মোবাইল') || cat.contains('phone') || cat.contains('mobile')) return '📱';
+    if (cat.contains('ফ্রিজ') || cat.contains('fridge') || cat.contains('refrigerator')) return '🧊';
+    if (cat.contains('টিভি') || cat.contains('tv') || cat.contains('television')) return '📺';
+    if (cat.contains('এসি') || cat.contains('ac') || cat.contains('cooler')) return '❄️';
+    if (cat.contains('বাইক') || cat.contains('bike') || cat.contains('motorcycle')) return '🛵';
+    if (cat.contains('ল্যাপটপ') || cat.contains('laptop') || cat.contains('কম্পিউটার')) return '💻';
+    if (cat.contains('ফার্নিচার') || cat.contains('furniture') || cat.contains('খাট')) return '🛋️';
+    if (cat.contains('ফ্যান') || cat.contains('fan')) return '🌀';
+    if (cat.contains('ঘড়ি') || cat.contains('watch')) return '⌚';
+    return '🏷️';
   }
 
   Map<String, dynamic> toJson() {

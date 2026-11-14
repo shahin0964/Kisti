@@ -270,6 +270,50 @@ class MoreScreen extends StatelessWidget {
     );
   }
 
+  void _showClearDataConfirm(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: LiquidGlassTheme.bgMidnight,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: Colors.white.withOpacity(0.15)),
+          ),
+          title: const Text('সব ডেটা মুছে ফেলবেন?', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'শো-রুমের সকল পণ্য বিক্রয়, কিস্তি খতিয়ান এবং আদায় রেকর্ড সম্পূর্ণ মুছে ফেলা হবে।',
+            style: TextStyle(color: LiquidGlassTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('বাতিল', style: TextStyle(color: Colors.white70)),
+            ),
+            TextButton(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final nav = Navigator.of(ctx);
+                await storage.clearAllData();
+                nav.pop();
+                messenger.showSnackBar(
+                  const SnackBar(
+                    backgroundColor: LiquidGlassTheme.bgMidnight,
+                    content: Text(
+                      'সকল ডেটা সফলভাবে মুছে ফেলা হয়েছে!',
+                      style: TextStyle(color: LiquidGlassTheme.sunsetCoral),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('মুছে ফেলুন', style: TextStyle(color: LiquidGlassTheme.sunsetCoral)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildSchemeCard(String title, String desc, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -538,6 +582,58 @@ class MoreScreen extends StatelessWidget {
                           SizedBox(height: 2),
                           Text(
                             'সকল বিক্রয় ও কিস্তির খতিয়ান সুরক্ষিত রাখুন',
+                            style: TextStyle(
+                              color: LiquidGlassTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white38,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
+
+              LiquidGlassCard(
+                glowColor: LiquidGlassTheme.sunsetCoral,
+                padding: const EdgeInsets.all(16),
+                onTap: () => _showClearDataConfirm(context),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: LiquidGlassTheme.sunsetCoral.withOpacity(0.15),
+                        border: Border.all(color: LiquidGlassTheme.sunsetCoral),
+                      ),
+                      child: const Icon(
+                        Icons.delete_forever_rounded,
+                        color: LiquidGlassTheme.sunsetCoral,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'সকল ডেটা রিসেট ও মুছুন',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'শো-রুমের সমস্ত রেকর্ড মুছে নতুনভাবে শুরু করুন',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,

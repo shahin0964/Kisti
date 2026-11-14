@@ -54,13 +54,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: LiquidGlassTheme.bgDarkVoid,
       body: LiquidBackground(
-        child: Stack(
-          children: [
-            // Active Tab View
-            IndexedStack(
-              index: _currentIndex,
-              children: screens,
-            ),
+        child: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              // Active Tab View
+              IndexedStack(
+                index: _currentIndex,
+                children: screens,
+              ),
 
             // Floating Liquid Glass Navigation Bar
             Positioned(
@@ -104,7 +106,8 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {

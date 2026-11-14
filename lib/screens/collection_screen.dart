@@ -227,26 +227,30 @@ class _CollectionScreenState extends State<CollectionScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'কিস্তি আদায় কেন্দ্র',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'কিস্তি আদায় কেন্দ্র',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      Text(
-                        'পণ্য কিস্তি গ্রহণ ও ডিজিটাল ভাউচার রশিদ',
-                        style: TextStyle(
-                          color: LiquidGlassTheme.textSecondary,
-                          fontSize: 12,
+                        Text(
+                          'পণ্য কিস্তি গ্রহণ ও ডিজিটাল ভাউচার রশিদ',
+                          style: TextStyle(
+                            color: LiquidGlassTheme.textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   const LiquidBadge(
                     label: 'রিয়েল-টাইম আদায়',
                     color: LiquidGlassTheme.neonEmerald,

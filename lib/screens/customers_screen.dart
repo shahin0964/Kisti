@@ -17,7 +17,7 @@ class CustomersScreen extends StatefulWidget {
 
 class _CustomersScreenState extends State<CustomersScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'সকল'; // 'সকল', 'মোবাইল', 'ফ্রিজ', 'টিভি', 'এসি', 'চলমান', 'বকেয়া'
+  String _selectedFilter = 'সকল';
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat("#,##,##0", "en_US");
@@ -33,14 +33,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
     final guarantorPhoneCtrl = TextEditingController();
 
     final productNameCtrl = TextEditingController();
+    final categoryCtrl = TextEditingController();
     final modelImeiCtrl = TextEditingController();
-    final cashPriceCtrl = TextEditingController(text: '40000');
-    final installmentPriceCtrl = TextEditingController(text: '45000');
-    final downPaymentCtrl = TextEditingController(text: '10000');
+    final cashPriceCtrl = TextEditingController();
+    final installmentPriceCtrl = TextEditingController();
+    final downPaymentCtrl = TextEditingController();
     final totalInstallmentsCtrl = TextEditingController(text: '10');
-
-    String selectedCategory = 'মোবাইল'; // 'মোবাইল', 'ফ্রিজ', 'টিভি', 'এসি', 'বাইক', 'অন্যান্য'
     String frequency = 'মাসিক';
+
+    final existingCats = widget.storage.dynamicCategories;
 
     showModalBottomSheet(
       context: context,
@@ -66,9 +67,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 child: LiquidGlassCard(
                   borderRadius: 28,
                   glowColor: LiquidGlassTheme.cyberCyan,
-                  padding: const EdgeInsets.all(22),
+                  padding: const EdgeInsets.all(20),
                   margin: const EdgeInsets.all(12),
                   child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,133 +81,120 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             Row(
                               children: const [
                                 Icon(Icons.add_shopping_cart_rounded,
-                                    color: LiquidGlassTheme.neonEmerald, size: 24),
+                                    color: LiquidGlassTheme.neonEmerald, size: 22),
                                 SizedBox(width: 8),
                                 Text(
                                   'নতুন পণ্য কিস্তিতে বিক্রয়',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 18,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white70),
+                              icon: const Icon(Icons.close, color: Colors.white70, size: 20),
                               onPressed: () => Navigator.pop(ctx),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
 
                         // Section 1: Product Information
                         const Text(
                           '১. পণ্যের বিবরণ',
                           style: TextStyle(
                             color: LiquidGlassTheme.cyberCyan,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        LiquidTextField(
-                          controller: productNameCtrl,
-                          label: 'পণ্যের নাম (যেমন: Walton 250L Fridge, Samsung 43" TV)',
-                          prefixIcon: Icons.devices_other_rounded,
-                        ),
-
-                        // Category Selector
-                        const SizedBox(height: 4),
-                        const Text(
-                          'পণ্যের ক্যাটাগরি',
-                          style: TextStyle(
-                            color: LiquidGlassTheme.textSecondary,
                             fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            'মোবাইল',
-                            'ফ্রিজ',
-                            'টিভি',
-                            'এসি',
-                            'অন্যান্য',
-                          ].map((cat) {
-                            final isSel = selectedCategory == cat;
-                            return Expanded(
-                              child: GestureDetector(
-                                onTap: () => setSheetState(() => selectedCategory = cat),
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: isSel
-                                        ? LiquidGlassTheme.cyberCyan.withOpacity(0.25)
-                                        : Colors.white.withOpacity(0.04),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: isSel
-                                          ? LiquidGlassTheme.cyberCyan
-                                          : Colors.white.withOpacity(0.1),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    cat,
-                                    style: TextStyle(
-                                      color: isSel ? Colors.white : Colors.white70,
-                                      fontSize: 11,
-                                      fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+
+                        LiquidTextField(
+                          controller: productNameCtrl,
+                          label: 'পণ্যের নাম (যেকোনো পণ্য)',
+                          hint: 'যেমন: Walton 250L Fridge, Samsung A55, ইত্যাদি',
+                          prefixIcon: Icons.devices_other_rounded,
                         ),
 
-                        const SizedBox(height: 8),
+                        // Dynamic Category Input Field (NO HARDCODING)
+                        LiquidTextField(
+                          controller: categoryCtrl,
+                          label: 'ক্যাটাগরি / পণ্যের ধরন (ঐচ্ছিক)',
+                          hint: 'যেমন: ফ্রিজ, মোবাইল, টিভি, বাইক, ফার্নিচার ইত্যাদি',
+                          prefixIcon: Icons.category_rounded,
+                        ),
+
+                        if (existingCats.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: existingCats.map((cat) {
+                              return ActionChip(
+                                label: Text(cat),
+                                labelStyle: const TextStyle(
+                                  color: LiquidGlassTheme.cyberCyan,
+                                  fontSize: 11,
+                                ),
+                                backgroundColor: Colors.white.withOpacity(0.06),
+                                side: BorderSide(
+                                  color: LiquidGlassTheme.cyberCyan.withOpacity(0.3),
+                                ),
+                                onPressed: () {
+                                  setSheetState(() {
+                                    categoryCtrl.text = cat;
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ],
+
                         LiquidTextField(
                           controller: modelImeiCtrl,
-                          label: 'মডেল / সিরিয়াল / IMEI নম্বর',
+                          label: 'মডেল / IMEI / Serial (ঐচ্ছিক)',
                           prefixIcon: Icons.qr_code_2_rounded,
                         ),
 
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
 
-                        // Section 2: Pricing & Installment Calculation
+                        // Section 2: Pricing & Installment
                         const Text(
-                          '২. দাম ও কিস্তির হিসাব',
+                          '২. বিক্রয় মূল্য ও কিস্তি হিসাব',
                           style: TextStyle(
                             color: LiquidGlassTheme.neonEmerald,
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
 
                         Row(
                           children: [
                             Expanded(
                               child: LiquidTextField(
                                 controller: cashPriceCtrl,
-                                label: 'নগদ মূল্য (Cash Price)',
+                                label: 'নগদ মূল্য (টাকা)',
+                                prefixIcon: Icons.sell_rounded,
                                 keyboardType: TextInputType.number,
-                                prefixIcon: Icons.payments_outlined,
-                                onChanged: (v) => setSheetState(() {}),
+                                onChanged: (val) {
+                                  setSheetState(() {});
+                                },
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: LiquidTextField(
                                 controller: installmentPriceCtrl,
                                 label: 'কিস্তিতে মোট মূল্য',
-                                keyboardType: TextInputType.number,
                                 prefixIcon: Icons.price_change_rounded,
-                                onChanged: (v) => setSheetState(() {}),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  setSheetState(() {});
+                                },
                               ),
                             ),
                           ],
@@ -217,31 +206,35 @@ class _CustomersScreenState extends State<CustomersScreen> {
                               child: LiquidTextField(
                                 controller: downPaymentCtrl,
                                 label: 'ডাউন পেমেন্ট (অগ্রিম)',
+                                prefixIcon: Icons.payments_rounded,
                                 keyboardType: TextInputType.number,
-                                prefixIcon: Icons.savings_rounded,
-                                onChanged: (v) => setSheetState(() {}),
+                                onChanged: (val) {
+                                  setSheetState(() {});
+                                },
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: LiquidTextField(
                                 controller: totalInstallmentsCtrl,
-                                label: 'কিস্তির সংখ্যা (মাস)',
+                                label: 'মোট কিস্তির সংখ্যা',
+                                prefixIcon: Icons.format_list_numbered_rounded,
                                 keyboardType: TextInputType.number,
-                                prefixIcon: Icons.numbers_rounded,
-                                onChanged: (v) => setSheetState(() {}),
+                                onChanged: (val) {
+                                  setSheetState(() {});
+                                },
                               ),
                             ),
                           ],
                         ),
 
-                        // Dynamic Real-time Calculation Summary
+                        // Realtime calculated monthly installment badge
                         Container(
                           margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(14),
+                            color: LiquidGlassTheme.neonEmerald.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: LiquidGlassTheme.neonEmerald.withOpacity(0.3),
                             ),
@@ -253,27 +246,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    'বকেয়া কিস্তির আসল টাকা',
-                                    style: TextStyle(
-                                      color: LiquidGlassTheme.textSecondary,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                  Text(
-                                    _formatCurrency(financedAmount),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    'প্রতি মাসের কিস্তি',
+                                    'প্রতি কিস্তির পরিমাণ:',
                                     style: TextStyle(
                                       color: LiquidGlassTheme.textSecondary,
                                       fontSize: 11,
@@ -283,8 +256,28 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                     _formatCurrency(instAmount),
                                     style: const TextStyle(
                                       color: LiquidGlassTheme.neonEmerald,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  const Text(
+                                    'বকেয়া কিস্তির টাকা:',
+                                    style: TextStyle(
+                                      color: LiquidGlassTheme.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatCurrency(financedAmount),
+                                    style: const TextStyle(
+                                      color: LiquidGlassTheme.cyberCyan,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
@@ -293,18 +286,59 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           ),
                         ),
 
+                        const SizedBox(height: 8),
+
+                        // Frequency Selector
+                        Row(
+                          children: ['মাসিক', 'সাপ্তাহিক', 'দৈনিক'].map((freq) {
+                            final isSel = frequency == freq;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () => setSheetState(() => frequency = freq),
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSel
+                                        ? LiquidGlassTheme.cyberCyan.withOpacity(0.2)
+                                        : Colors.white.withOpacity(0.04),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: isSel
+                                          ? LiquidGlassTheme.cyberCyan
+                                          : Colors.white.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    freq,
+                                    style: TextStyle(
+                                      color: isSel
+                                          ? LiquidGlassTheme.cyberCyan
+                                          : Colors.white70,
+                                      fontSize: 11,
+                                      fontWeight:
+                                          isSel ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
                         const SizedBox(height: 14),
 
-                        // Section 3: Customer & Guarantor Info
+                        // Section 3: Customer & Guarantor
                         const Text(
                           '৩. ক্রেতা ও জামিনদারের তথ্য',
                           style: TextStyle(
                             color: LiquidGlassTheme.amberGold,
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
 
                         LiquidTextField(
                           controller: customerNameCtrl,
@@ -319,12 +353,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
                         ),
                         LiquidTextField(
                           controller: addressCtrl,
-                          label: 'ঠিকানা ও কর্মস্থল',
+                          label: 'ঠিকানা ও কর্মস্থল (ঐচ্ছিক)',
                           prefixIcon: Icons.location_on_rounded,
                         ),
                         LiquidTextField(
                           controller: nidCtrl,
-                          label: 'ক্রেতার NID নম্বর',
+                          label: 'ক্রেতার NID নম্বর (ঐচ্ছিক)',
                           prefixIcon: Icons.badge_rounded,
                           keyboardType: TextInputType.number,
                         ),
@@ -333,15 +367,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             Expanded(
                               child: LiquidTextField(
                                 controller: guarantorNameCtrl,
-                                label: 'জামিনদার / গ্যারান্টারের নাম',
+                                label: 'জামিনদার নাম (ঐচ্ছিক)',
                                 prefixIcon: Icons.supervised_user_circle_rounded,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: LiquidTextField(
                                 controller: guarantorPhoneCtrl,
-                                label: 'জামিনদারের মোবাইল',
+                                label: 'জামিনদার মোবাইল',
                                 prefixIcon: Icons.phone_android_rounded,
                                 keyboardType: TextInputType.phone,
                               ),
@@ -349,7 +383,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           ],
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 18),
 
                         SizedBox(
                           width: double.infinity,
@@ -369,6 +403,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                 return;
                               }
 
+                              final cat = categoryCtrl.text.trim().isNotEmpty
+                                  ? categoryCtrl.text.trim()
+                                  : 'পণ্য';
+
                               final newSale = Customer(
                                 id: 'SALE-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
                                 name: custName,
@@ -378,7 +416,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                 guarantorName: guarantorNameCtrl.text.trim(),
                                 guarantorPhone: guarantorPhoneCtrl.text.trim(),
                                 productName: prodName,
-                                productCategory: selectedCategory,
+                                productCategory: cat,
                                 modelOrImei: modelImeiCtrl.text.trim(),
                                 cashPrice: double.tryParse(cashPriceCtrl.text) ?? 0.0,
                                 installmentPrice: installmentPrice,
@@ -441,49 +479,89 @@ class _CustomersScreenState extends State<CustomersScreen> {
           _selectedFilter == 'পরিশোধিত') {
         matchesFilter = c.status == _selectedFilter;
       } else {
-        // Category filter
+        // Dynamic Category filter
         matchesFilter = c.productCategory == _selectedFilter;
       }
 
       return matchesQuery && matchesFilter;
     }).toList();
 
+    // Dynamic Filter Chip list (NO HARDCODING)
+    final filterOptions = [
+      'সকল',
+      'চলমান',
+      'বকেয়া',
+      'পরিশোধিত',
+      ...widget.storage.dynamicCategories,
+    ];
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
-            // Header with Add Button
+            // Safe Header: Title + Add Button that never overflows
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'পণ্য বিক্রয় ও গ্রাহক খতিয়ান',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'পণ্য বিক্রয় খতিয়ান',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      Text(
-                        'মোট ${widget.storage.customers.length} টি পণ্য কিস্তিতে সরবরাহকৃত',
-                        style: const TextStyle(
-                          color: LiquidGlassTheme.textSecondary,
-                          fontSize: 12,
+                        Text(
+                          'মোট ${widget.storage.customers.length} টি পণ্য সরবরাহ',
+                          style: const TextStyle(
+                            color: LiquidGlassTheme.textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  LiquidButton(
-                    text: 'নতুন বিক্রয়',
-                    icon: Icons.add_rounded,
-                    height: 40,
-                    onPressed: _showAddSaleDialog,
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _showAddSaleDialog,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: LiquidGlassTheme.neonEmerald.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: LiquidGlassTheme.neonEmerald,
+                          width: 1.2,
+                        ),
+                        boxShadow: LiquidGlassTheme.neonGlow(
+                          LiquidGlassTheme.neonEmerald,
+                          intensity: 0.25,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.add_rounded, color: LiquidGlassTheme.neonEmerald, size: 18),
+                          SizedBox(width: 4),
+                          Text(
+                            'নতুন বিক্রয়',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -491,14 +569,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
             // Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               child: LiquidTextField(
                 controller: _searchController,
-                label: 'ক্রেতা, পণ্য (টিভি, ফ্রিজ, মোবাইল) বা IMEI দিয়ে খুঁজুন...',
+                label: 'ক্রেতা, পণ্য বা IMEI দিয়ে খুঁজুন...',
                 prefixIcon: Icons.search_rounded,
+                onChanged: (val) => setState(() {}),
                 suffix: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.white70),
+                        icon: const Icon(Icons.clear, color: Colors.white70, size: 18),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {});
@@ -508,26 +587,20 @@ class _CustomersScreenState extends State<CustomersScreen> {
               ),
             ),
 
-            // Filter Chips
+            // Filter Chips (Dynamic, non-hardcoded)
             Container(
-              height: 40,
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              child: ListView(
+              height: 36,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  'সকল',
-                  'মোবাইল',
-                  'ফ্রিজ',
-                  'টিভি',
-                  'এসি',
-                  'চলমান',
-                  'বকেয়া',
-                  'পরিশোধিত',
-                ].map((f) {
+                itemCount: filterOptions.length,
+                itemBuilder: (context, idx) {
+                  final f = filterOptions[idx];
                   final isSel = _selectedFilter == f;
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.only(right: 6),
                     child: ChoiceChip(
                       label: Text(f),
                       selected: isSel,
@@ -539,247 +612,235 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       labelStyle: TextStyle(
                         color: isSel ? Colors.black : Colors.white70,
                         fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                       selectedColor: LiquidGlassTheme.cyberCyan,
-                      backgroundColor: Colors.white.withOpacity(0.06),
+                      backgroundColor: Colors.white.withOpacity(0.05),
                       side: BorderSide(
                         color: isSel
                             ? LiquidGlassTheme.cyberCyan
-                            : Colors.white.withOpacity(0.12),
+                            : Colors.white.withOpacity(0.10),
                       ),
                     ),
                   );
-                }).toList(),
+                },
               ),
             ),
 
-            // Product Installment Cards List
+            const SizedBox(height: 4),
+
+            // Customers / Product Sales List
             Expanded(
               child: filteredCustomers.isEmpty
                   ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(
-                            Icons.inventory_2_outlined,
-                            size: 48,
-                            color: LiquidGlassTheme.textMuted,
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            'কোনো পণ্য বা গ্রাহক খুঁজে পাওয়া যায়নি',
-                            style: TextStyle(color: LiquidGlassTheme.textMuted),
-                          ),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 48,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'কোনো বিক্রয় রেকর্ড পাওয়া যায়নি',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'উপরের "নতুন বিক্রয়" বাটনে চাপ দিয়ে পণ্য কিস্তি যোগ করুন',
+                              style: TextStyle(
+                                color: LiquidGlassTheme.textMuted,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       itemCount: filteredCustomers.length,
-                      itemBuilder: (context, index) {
-                        final sale = filteredCustomers[index];
-
-                        return LiquidGlassCard(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CustomerDetailScreen(
-                                  customerId: sale.id,
-                                  storage: widget.storage,
-                                ),
-                              ),
-                            ).then((_) => setState(() {}));
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  // Product Category Avatar
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withOpacity(0.08),
-                                      border: Border.all(
-                                        color: sale.status == 'বকেয়া'
-                                            ? LiquidGlassTheme.sunsetCoral
-                                            : LiquidGlassTheme.neonEmerald
-                                                .withOpacity(0.7),
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      sale.categoryIcon,
-                                      style: const TextStyle(fontSize: 24),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          sale.name,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          sale.productName,
-                                          style: const TextStyle(
-                                            color: LiquidGlassTheme.neonEmerald,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        if (sale.modelOrImei.isNotEmpty)
-                                          Text(
-                                            sale.modelOrImei,
-                                            style: const TextStyle(
-                                              color: LiquidGlassTheme.textMuted,
-                                              fontSize: 11,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  LiquidBadge(
-                                    label: sale.status,
-                                    color: sale.status == 'পরিশোধিত'
-                                        ? LiquidGlassTheme.neonEmerald
-                                        : (sale.status == 'বকেয়া'
-                                            ? LiquidGlassTheme.sunsetCoral
-                                            : LiquidGlassTheme.amberGold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 14),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'কিস্তি মূল্য',
-                                        style: TextStyle(
-                                          color: LiquidGlassTheme.textMuted,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatCurrency(sale.installmentPrice),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        'ডাউন পেমেন্ট',
-                                        style: TextStyle(
-                                          color: LiquidGlassTheme.textMuted,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatCurrency(sale.downPayment),
-                                        style: const TextStyle(
-                                          color: LiquidGlassTheme.cyberCyan,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      const Text(
-                                        'প্রতি কিস্তি',
-                                        style: TextStyle(
-                                          color: LiquidGlassTheme.textMuted,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatCurrency(sale.installmentAmount),
-                                        style: const TextStyle(
-                                          color: LiquidGlassTheme.neonEmerald,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: LinearProgressIndicator(
-                                  value: sale.progressPercentage,
-                                  minHeight: 6,
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.08),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    sale.status == 'বকেয়া'
-                                        ? LiquidGlassTheme.sunsetCoral
-                                        : LiquidGlassTheme.neonEmerald,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'পরিশোধ: ${sale.paidInstallments}/${sale.totalInstallments} কিস্তি',
-                                    style: const TextStyle(
-                                      color: LiquidGlassTheme.textMuted,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                  Text(
-                                    'বকেয়া কিস্তি: ${_formatCurrency(sale.remainingAmount)}',
-                                    style: const TextStyle(
-                                      color: LiquidGlassTheme.amberGold,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
+                      itemBuilder: (context, idx) {
+                        final customer = filteredCustomers[idx];
+                        return _buildCustomerCard(customer);
                       },
                     ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCustomerCard(Customer customer) {
+    Color statusColor;
+    if (customer.status == 'পরিশোধিত') {
+      statusColor = LiquidGlassTheme.neonEmerald;
+    } else if (customer.status == 'বকেয়া') {
+      statusColor = LiquidGlassTheme.sunsetCoral;
+    } else {
+      statusColor = LiquidGlassTheme.amberGold;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: LiquidGlassCard(
+        padding: const EdgeInsets.all(14),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CustomerDetailScreen(
+                customerId: customer.id,
+                storage: widget.storage,
+              ),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.06),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.12),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    customer.categoryIcon,
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        customer.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        customer.productName,
+                        style: const TextStyle(
+                          color: LiquidGlassTheme.cyberCyan,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (customer.modelOrImei.isNotEmpty)
+                        Text(
+                          customer.modelOrImei,
+                          style: const TextStyle(
+                            color: LiquidGlassTheme.textMuted,
+                            fontSize: 10.5,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                LiquidBadge(
+                  label: customer.status,
+                  color: statusColor,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoCol('কিস্তি মূল্য', _formatCurrency(customer.installmentPrice)),
+                _buildInfoCol('ডাউন পেমেন্ট', _formatCurrency(customer.downPayment)),
+                _buildInfoCol('প্রতি কিস্তি', _formatCurrency(customer.installmentAmount),
+                    color: LiquidGlassTheme.neonEmerald),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: customer.progressPercentage,
+                minHeight: 5,
+                backgroundColor: Colors.white.withOpacity(0.08),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  customer.isFullyPaid
+                      ? LiquidGlassTheme.neonEmerald
+                      : LiquidGlassTheme.cyberCyan,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'পরিশোধ: ${customer.paidInstallments}/${customer.totalInstallments} কিস্তি',
+                  style: const TextStyle(
+                    color: LiquidGlassTheme.textMuted,
+                    fontSize: 10.5,
+                  ),
+                ),
+                Text(
+                  'বকেয়া কিস্তি: ${_formatCurrency(customer.remainingAmount)}',
+                  style: const TextStyle(
+                    color: LiquidGlassTheme.sunsetCoral,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCol(String label, String value, {Color? color}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: LiquidGlassTheme.textMuted,
+            fontSize: 10.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            color: color ?? Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }
