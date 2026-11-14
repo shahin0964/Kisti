@@ -37,7 +37,7 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // App Bar / Top Futuristic Header
+          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -60,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                         child: const Icon(
-                          Icons.account_balance_wallet_rounded,
+                          Icons.storefront_rounded,
                           color: LiquidGlassTheme.neonEmerald,
                           size: 20,
                         ),
@@ -87,16 +87,30 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              // Live Status Badge
               const LiquidBadge(
-                label: 'অনলাইন সিস্টেম',
+                label: 'পণ্য কিস্তি শোরুম',
                 color: LiquidGlassTheme.cyberCyan,
-                icon: Icons.wifi_rounded,
+                icon: Icons.check_circle_rounded,
               ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          // Product Categories Quick Status Bar
+          Row(
+            children: [
+              _buildCategoryPill('📱 মোবাইল', '${storage.mobileCount} টি', LiquidGlassTheme.cyberCyan),
+              const SizedBox(width: 8),
+              _buildCategoryPill('🧊 ফ্রিজ', '${storage.fridgeCount} টি', LiquidGlassTheme.neonEmerald),
+              const SizedBox(width: 8),
+              _buildCategoryPill('📺 টিভি', '${storage.tvCount} টি', LiquidGlassTheme.electricViolet),
+              const SizedBox(width: 8),
+              _buildCategoryPill('❄️ এসি', '${storage.acCount} টি', LiquidGlassTheme.amberGold),
+            ],
+          ),
+
+          const SizedBox(height: 18),
 
           // Main Hero Card: Today's Collection Liquid Progress
           LiquidGlassCard(
@@ -112,7 +126,7 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'আজকের আদায়',
+                          'আজকের কিস্তি আদায়',
                           style: TextStyle(
                             color: LiquidGlassTheme.textSecondary,
                             fontSize: 14,
@@ -218,16 +232,16 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'মোট বিতরণ',
+                        children: const [
+                          Text(
+                            'মোট পণ্য বিক্রয়',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                           Icon(
-                            Icons.arrow_upward_rounded,
+                            Icons.shopping_bag_rounded,
                             size: 16,
                             color: LiquidGlassTheme.cyberCyan,
                           ),
@@ -235,7 +249,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatCurrency(storage.totalPrincipalDisbursed),
+                        _formatCurrency(storage.totalProductSalesValue),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -244,7 +258,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${storage.customers.length} জন গ্রাহক',
+                        '${storage.totalProductsSoldCount} টি পণ্য ডেলিভারি',
                         style: const TextStyle(
                           color: LiquidGlassTheme.textMuted,
                           fontSize: 11,
@@ -264,9 +278,9 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'মোট বকেয়া',
+                        children: const [
+                          Text(
+                            'বকেয়া কিস্তি',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
@@ -281,7 +295,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatCurrency(storage.totalOutstanding),
+                        _formatCurrency(storage.totalOutstandingKisti),
                         style: const TextStyle(
                           color: LiquidGlassTheme.sunsetCoral,
                           fontSize: 18,
@@ -314,16 +328,16 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'মোট আদায়',
+                        children: const [
+                          Text(
+                            'ডাউন পেমেন্ট জমা',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                           Icon(
-                            Icons.savings_rounded,
+                            Icons.paid_rounded,
                             size: 16,
                             color: LiquidGlassTheme.electricViolet,
                           ),
@@ -331,7 +345,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatCurrency(storage.totalCollectedAllTime),
+                        _formatCurrency(storage.totalDownPaymentCollected),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -339,9 +353,9 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${storage.collections.length} টি রশিদ',
-                        style: const TextStyle(
+                      const Text(
+                        'অগ্রিম নগদ সংগ্রহ',
+                        style: TextStyle(
                           color: LiquidGlassTheme.textMuted,
                           fontSize: 11,
                         ),
@@ -360,16 +374,16 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'সক্রিয় ঋণ',
+                        children: const [
+                          Text(
+                            'চলমান কিস্তি অ্যাকাউন্ট',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                           Icon(
-                            Icons.group_rounded,
+                            Icons.inventory_2_rounded,
                             size: 16,
                             color: LiquidGlassTheme.amberGold,
                           ),
@@ -386,7 +400,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${storage.completedCustomersCount} টি সমাপ্ত',
+                        '${storage.completedCustomersCount} টি সম্পূর্ণ পরিশোধিত',
                         style: const TextStyle(
                           color: LiquidGlassTheme.textMuted,
                           fontSize: 11,
@@ -399,7 +413,7 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Quick Action Banner
           LiquidGlassCard(
@@ -420,7 +434,7 @@ class DashboardScreen extends StatelessWidget {
                     boxShadow: LiquidGlassTheme.neonGlow(LiquidGlassTheme.cyberCyan),
                   ),
                   child: const Icon(
-                    Icons.bolt_rounded,
+                    Icons.add_shopping_cart_rounded,
                     color: Colors.black87,
                     size: 22,
                   ),
@@ -431,7 +445,7 @@ class DashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'তাৎক্ষণিক কিস্তি আদায়',
+                        'নতুন পণ্য কিস্তিতে বিক্রয়',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -440,7 +454,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        'ওয়ান-ট্যাপে সরাসরি কিস্তির টাকা এন্ট্রি করুন',
+                        'টিভি, ফ্রিজ বা মোবাইল নতুন কিস্তি এন্ট্রি করুন',
                         style: TextStyle(
                           color: LiquidGlassTheme.textSecondary,
                           fontSize: 12,
@@ -450,9 +464,9 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 LiquidButton(
-                  text: 'আদায়',
+                  text: 'বিক্রয়',
                   height: 38,
-                  onPressed: () => onNavigateTab(2), // Jump to Collection tab
+                  onPressed: () => onNavigateTab(1), // Jump to Customers/Sales
                 ),
               ],
             ),
@@ -465,7 +479,7 @@ class DashboardScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'আজকের প্রদেয় কিস্তি',
+                'আজকের প্রদেয় পণ্যের কিস্তি',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -473,7 +487,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () => onNavigateTab(1), // View Customers
+                onPressed: () => onNavigateTab(1),
                 child: const Text(
                   'সবগুলো দেখুন',
                   style: TextStyle(
@@ -488,7 +502,7 @@ class DashboardScreen extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Due Customers List
+          // Due Customers List with Product Info
           if (storage.todayDueCustomers.isEmpty)
             Container(
               padding: const EdgeInsets.all(24),
@@ -499,7 +513,7 @@ class DashboardScreen extends StatelessWidget {
               ),
             )
           else
-            ...storage.todayDueCustomers.take(4).map((cust) {
+            ...storage.todayDueCustomers.take(4).map((sale) {
               return LiquidGlassCard(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),
@@ -508,7 +522,7 @@ class DashboardScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => CustomerDetailScreen(
-                        customerId: cust.id,
+                        customerId: sale.id,
                         storage: storage,
                       ),
                     ),
@@ -516,27 +530,23 @@ class DashboardScreen extends StatelessWidget {
                 },
                 child: Row(
                   children: [
-                    // Avatar circle with frequency
+                    // Product Category Avatar
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white.withOpacity(0.08),
                         border: Border.all(
-                          color: cust.status == 'বকেয়া'
+                          color: sale.status == 'বকেয়া'
                               ? LiquidGlassTheme.sunsetCoral.withOpacity(0.6)
                               : LiquidGlassTheme.neonEmerald.withOpacity(0.6),
                         ),
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        cust.name.isNotEmpty ? cust.name[0] : 'গ',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        sale.categoryIcon,
+                        style: const TextStyle(fontSize: 22),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -548,7 +558,7 @@ class DashboardScreen extends StatelessWidget {
                             children: [
                               Flexible(
                                 child: Text(
-                                  cust.name,
+                                  sale.name,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -559,17 +569,28 @@ class DashboardScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               LiquidBadge(
-                                label: cust.frequency,
+                                label: sale.productCategory,
                                 color: LiquidGlassTheme.cyberCyan,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(
-                            'পরিশোধ: ${cust.paidInstallments}/${cust.totalInstallments} কিস্তি',
+                            sale.productName,
+                            style: const TextStyle(
+                              color: LiquidGlassTheme.neonEmerald,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'কিস্তি: ${sale.paidInstallments}/${sale.totalInstallments} (${sale.frequency})',
                             style: const TextStyle(
                               color: LiquidGlassTheme.textMuted,
-                              fontSize: 12,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -579,21 +600,21 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          _formatCurrency(cust.installmentAmount),
+                          _formatCurrency(sale.installmentAmount),
                           style: const TextStyle(
-                            color: LiquidGlassTheme.neonEmerald,
+                            color: Colors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 4),
                         LiquidButton(
-                          text: 'গ্রহণ',
+                          text: 'আদায়',
                           height: 30,
                           glowColor: LiquidGlassTheme.neonEmerald,
                           onPressed: () {
                             if (onQuickCollect != null) {
-                              onQuickCollect!(cust);
+                              onQuickCollect!(sale);
                             } else {
                               onNavigateTab(2);
                             }
@@ -608,9 +629,9 @@ class DashboardScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Section: Recent Collections
+          // Section: Recent Product Installment Collections
           const Text(
-            'সাম্প্রতিক আদায় রশিদ',
+            'সাম্প্রতিক পণ্য কিস্তি রশিদ',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -642,7 +663,7 @@ class DashboardScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.check_circle_outline_rounded,
+                        Icons.receipt_long_rounded,
                         color: LiquidGlassTheme.neonEmerald,
                         size: 20,
                       ),
@@ -653,12 +674,14 @@ class DashboardScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            col.customerName,
+                            '${col.customerName} • ${col.productName}',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -684,6 +707,40 @@ class DashboardScreen extends StatelessWidget {
               );
             }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryPill(String title, String count, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.25)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              count,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

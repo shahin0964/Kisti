@@ -25,7 +25,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _collectorController =
-      TextEditingController(text: 'ফিল্ড ম্যানেজার');
+      TextEditingController(text: 'শোরুম ম্যানেজার');
   String _selectedMethod = 'নগদ';
   String _dateFilter = 'সকল'; // 'আজ', 'এই সপ্তাহ', 'সকল'
 
@@ -36,6 +36,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
       _selectCustomer(widget.preselectedCustomer!);
     } else if (widget.storage.todayDueCustomers.isNotEmpty) {
       _selectCustomer(widget.storage.todayDueCustomers.first);
+    } else if (widget.storage.customers.isNotEmpty) {
+      final active = widget.storage.customers.where((c) => !c.isFullyPaid).toList();
+      if (active.isNotEmpty) _selectCustomer(active.first);
     }
   }
 
@@ -81,7 +84,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'কিস্তি আদায় সফল হয়েছে!',
+                  'কিস্তি আদায় স্লিপ তৈরি হয়েছে!',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -97,20 +100,23 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     letterSpacing: 1.2,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 const Divider(color: Colors.white12),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 _buildReceiptRow('গ্রাহকের নাম', record.customerName),
-                _buildReceiptRow('আদায়কৃত পরিমাণ', _formatCurrency(record.amount),
+                _buildReceiptRow('বিক্রিত পণ্য', '${customer.categoryIcon} ${customer.productName}'),
+                _buildReceiptRow('আদায়কৃত কিস্তি', _formatCurrency(record.amount),
                     valueColor: LiquidGlassTheme.neonEmerald),
-                _buildReceiptRow('কিস্তি নম্বর', '#${record.installmentIndex}'),
+                _buildReceiptRow('কিস্তি কিস্তি সংখ্যা', '#${record.installmentIndex} / ${customer.totalInstallments}'),
                 _buildReceiptRow('পেমেন্ট মাধ্যম', record.paymentMethod),
+                _buildReceiptRow('অবশিষ্ট বকেয়া', _formatCurrency(customer.remainingAmount),
+                    valueColor: LiquidGlassTheme.sunsetCoral),
                 _buildReceiptRow('তারিখ ও সময়',
                     DateFormat('dd MMM yyyy, hh:mm a').format(record.date)),
-                _buildReceiptRow('সংগ্রাহক', record.collector),
+                _buildReceiptRow('রিসিভার / শোরুম', record.collector),
                 if (record.note.isNotEmpty)
                   _buildReceiptRow('মন্তব্য', record.note),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 const Divider(color: Colors.white12),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -141,12 +147,16 @@ class _CollectionScreenState extends State<CollectionScreen> {
               fontSize: 12,
             ),
           ),
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor ?? Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: valueColor ?? Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -157,7 +167,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   Future<void> _submitCollection() async {
     if (_selectedCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('অনুগ্রহ করে একজন গ্রাহক নির্বাচন করুন')),
+        const SnackBar(content: Text('অনুগ্রহ করে একজন গ্রাহক ও পণ্য নির্বাচন করুন')),
       );
       return;
     }
@@ -229,7 +239,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         ),
                       ),
                       Text(
-                        'দ্রুত কালেকশন এন্ট্রি ও ভাউচার রশিদ',
+                        'পণ্য কিস্তি গ্রহণ ও ডিজিটাল ভাউচার রশিদ',
                         style: TextStyle(
                           color: LiquidGlassTheme.textSecondary,
                           fontSize: 12,
@@ -238,7 +248,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     ],
                   ),
                   const LiquidBadge(
-                    label: 'রিয়েল-টাইম খতিয়ান',
+                    label: 'রিয়েল-টাইম আদায়',
                     color: LiquidGlassTheme.neonEmerald,
                   ),
                 ],
@@ -254,7 +264,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'কিস্তি সংগ্রহ ফরম',
+                      'পণ্য কিস্তি আদায় ফরম',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -265,7 +275,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
                     // Customer Selector Dropdown
                     const Text(
-                      'গ্রাহক নির্বাচন করুন',
+                      'গ্রাহক ও পণ্য নির্বাচন করুন',
                       style: TextStyle(
                         color: LiquidGlassTheme.textSecondary,
                         fontSize: 12,
@@ -287,20 +297,21 @@ class _CollectionScreenState extends State<CollectionScreen> {
                           dropdownColor: LiquidGlassTheme.bgMidnight,
                           value: _selectedCustomer,
                           hint: const Text(
-                            'গ্রাহক বাছাই করুন',
+                            'গ্রাহক ও পণ্য বাছাই করুন',
                             style: TextStyle(color: LiquidGlassTheme.textMuted),
                           ),
                           items: widget.storage.customers
-                              .where((c) => c.status != 'পরিশোধিত')
+                              .where((c) => !c.isFullyPaid)
                               .map((c) {
                             return DropdownMenuItem<Customer>(
                               value: c,
                               child: Text(
-                                '${c.name} (${c.frequency} - ${_formatCurrency(c.installmentAmount)})',
+                                '${c.categoryIcon} ${c.name} - ${c.productName} (${_formatCurrency(c.installmentAmount)})',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),
@@ -322,24 +333,58 @@ class _CollectionScreenState extends State<CollectionScreen> {
                             color: LiquidGlassTheme.cyberCyan.withOpacity(0.2),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            Text(
-                              'কিস্তি #${_selectedCustomer!.paidInstallments + 1} / ${_selectedCustomer!.totalInstallments}',
-                              style: const TextStyle(
-                                color: LiquidGlassTheme.cyberCyan,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      _selectedCustomer!.categoryIcon,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _selectedCustomer!.productName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  'মোট কিস্তি: ${_selectedCustomer!.totalInstallments} টি',
+                                  style: const TextStyle(
+                                    color: LiquidGlassTheme.cyberCyan,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              'বকেয়া: ${_formatCurrency(_selectedCustomer!.remainingAmount)}',
-                              style: const TextStyle(
-                                color: LiquidGlassTheme.sunsetCoral,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'কিস্তি #${_selectedCustomer!.paidInstallments + 1} জমা',
+                                  style: const TextStyle(
+                                    color: LiquidGlassTheme.neonEmerald,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'বাকি বকেয়া: ${_formatCurrency(_selectedCustomer!.remainingAmount)}',
+                                  style: const TextStyle(
+                                    color: LiquidGlassTheme.sunsetCoral,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -448,13 +493,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                           label: Text(f),
                           selected: isSel,
                           onSelected: (val) => setState(() => _dateFilter = f),
+                          selectedColor: LiquidGlassTheme.cyberCyan.withOpacity(0.25),
+                          backgroundColor: Colors.white.withOpacity(0.04),
                           labelStyle: TextStyle(
-                            color: isSel ? Colors.black : Colors.white70,
+                            color: isSel ? LiquidGlassTheme.cyberCyan : Colors.white60,
                             fontSize: 11,
                             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
                           ),
-                          selectedColor: LiquidGlassTheme.cyberCyan,
-                          backgroundColor: Colors.white.withOpacity(0.06),
                           side: BorderSide(
                             color: isSel
                                 ? LiquidGlassTheme.cyberCyan
@@ -467,32 +512,28 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 ],
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
-              // Total Collected Banner for the filter
-              Container(
+              // Filtered Total Highlight Card
+              LiquidGlassCard(
+                glowColor: LiquidGlassTheme.cyberCyan,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
-                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'নির্বাচিত সময়ের মোট আদায় (${filteredCollections.length} টি)',
+                      '$_dateFilter মোট সংগৃহীত:',
                       style: const TextStyle(
                         color: LiquidGlassTheme.textSecondary,
-                        fontSize: 12,
+                        fontSize: 13,
                       ),
                     ),
                     Text(
                       _formatCurrency(totalFilterColl),
                       style: const TextStyle(
                         color: LiquidGlassTheme.neonEmerald,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -507,7 +548,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   padding: const EdgeInsets.all(32),
                   alignment: Alignment.center,
                   child: const Text(
-                    'কোনো আদায় পাওয়া যায়নি',
+                    'কোনো কিস্তি আদায় পাওয়া যায়নি',
                     style: TextStyle(color: LiquidGlassTheme.textMuted),
                   ),
                 )
@@ -552,7 +593,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${col.receiptNo} • ${col.paymentMethod}',
+                                '${col.productName.isNotEmpty ? "${col.productName} • " : ""}${col.receiptNo} • ${col.paymentMethod}',
                                 style: const TextStyle(
                                   color: LiquidGlassTheme.textMuted,
                                   fontSize: 11,
@@ -568,23 +609,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                             ],
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              _formatCurrency(col.amount),
-                              style: const TextStyle(
-                                color: LiquidGlassTheme.neonEmerald,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            LiquidBadge(
-                              label: 'কিস্তি #${col.installmentIndex}',
-                              color: LiquidGlassTheme.cyberCyan,
-                            ),
-                          ],
+                        Text(
+                          _formatCurrency(col.amount),
+                          style: const TextStyle(
+                            color: LiquidGlassTheme.neonEmerald,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ],
                     ),

@@ -55,7 +55,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'কিস্তি আদায় স্লিপ',
+                          'পণ্য কিস্তি আদায় স্লিপ',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -69,20 +69,37 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'গ্রাহক: ${customer.name}',
-                      style: const TextStyle(
-                        color: LiquidGlassTheme.cyberCyan,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      'কিস্তি নং ${customer.paidInstallments + 1} / ${customer.totalInstallments}',
-                      style: const TextStyle(
-                        color: LiquidGlassTheme.textSecondary,
-                        fontSize: 12,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          customer.categoryIcon,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${customer.name} • ${customer.productName}',
+                                style: const TextStyle(
+                                  color: LiquidGlassTheme.cyberCyan,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                'কিস্তি নং ${customer.paidInstallments + 1} / ${customer.totalInstallments} • বকেয়া: ${_formatCurrency(customer.remainingAmount)}',
+                                style: const TextStyle(
+                                  color: LiquidGlassTheme.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     LiquidTextField(
@@ -152,27 +169,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         onPressed: () async {
                           final amt = double.tryParse(amountController.text) ??
                               customer.installmentAmount;
+                          final nav = Navigator.of(ctx);
+                          final messenger = ScaffoldMessenger.of(context);
                           await widget.storage.recordCollection(
                             customer: customer,
                             amount: amt,
                             paymentMethod: paymentMethod,
                             note: noteController.text.trim(),
                           );
-                          if (context.mounted) {
-                            Navigator.pop(ctx);
-                            setState(() {});
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: LiquidGlassTheme.bgMidnight,
-                                content: Text(
-                                  '${_formatCurrency(amt)} আদায় সফল হয়েছে!',
-                                  style: const TextStyle(
-                                    color: LiquidGlassTheme.neonEmerald,
-                                  ),
+                          if (!mounted) return;
+                          nav.pop();
+                          setState(() {});
+                          messenger.showSnackBar(
+                            SnackBar(
+                              backgroundColor: LiquidGlassTheme.bgMidnight,
+                              content: Text(
+                                '${customer.productName}-এর ${_formatCurrency(amt)} আদায় সফল হয়েছে!',
+                                style: const TextStyle(
+                                  color: LiquidGlassTheme.neonEmerald,
                                 ),
                               ),
-                            );
-                          }
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -197,11 +215,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             side: BorderSide(color: Colors.white.withOpacity(0.15)),
           ),
           title: const Text(
-            'গ্রাহক মুছে ফেলবেন?',
+            'গ্রাহক ও পণ্য বিক্রয় খতিয়ান মুছবেন?',
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            '${customer.name}-এর সম্পূর্ণ কিস্তির খতিয়ান মুছে ফেলা হবে। এই কাজটি পুনরায় ফিরিয়ে আনা যাবে না।',
+            '${customer.name}-এর ${customer.productName} বিক্রয়ের সমস্ত কিস্তির খতিয়ান মুছে ফেলা হবে। এই কাজটি পুনরায় ফিরিয়ে আনা যাবে না।',
             style: const TextStyle(color: LiquidGlassTheme.textSecondary),
           ),
           actions: [
@@ -211,11 +229,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             ),
             TextButton(
               onPressed: () async {
+                final nav = Navigator.of(context);
+                final dialogNav = Navigator.of(ctx);
                 await widget.storage.deleteCustomer(customer.id);
-                if (context.mounted) {
-                  Navigator.pop(ctx);
-                  Navigator.pop(context);
-                }
+                if (!mounted) return;
+                dialogNav.pop();
+                nav.pop();
               },
               child: const Text(
                 'মুছে ফেলুন',
@@ -269,7 +288,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Text(
-                        'গ্রাহক খতিয়ান (পাসবুক)',
+                        'পণ্য কিস্তি পাসবুক ও খতিয়ান',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -288,7 +307,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                 ),
               ),
 
-              // Customer Header Info Card
+              // Customer & Product Header Info Card
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -318,12 +337,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    customer.name.isNotEmpty ? customer.name[0] : 'গ',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w900,
-                                    ),
+                                    customer.categoryIcon,
+                                    style: const TextStyle(fontSize: 28),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -332,48 +347,46 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        customer.name,
+                                        customer.productName,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 18,
+                                          fontSize: 17,
                                           fontWeight: FontWeight.w800,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.person_rounded,
+                                            size: 13,
+                                            color: LiquidGlassTheme.cyberCyan,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            customer.name,
+                                            style: const TextStyle(
+                                              color: LiquidGlassTheme.cyberCyan,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
                                       Row(
                                         children: [
                                           const Icon(
                                             Icons.phone_rounded,
-                                            size: 13,
-                                            color: LiquidGlassTheme.cyberCyan,
+                                            size: 12,
+                                            color: LiquidGlassTheme.textSecondary,
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
                                             customer.phone,
                                             style: const TextStyle(
                                               color: LiquidGlassTheme.textSecondary,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.location_on_rounded,
-                                            size: 13,
-                                            color: LiquidGlassTheme.textMuted,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              customer.address,
-                                              style: const TextStyle(
-                                                color: LiquidGlassTheme.textMuted,
-                                                fontSize: 12,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
+                                              fontSize: 12,
                                             ),
                                           ),
                                         ],
@@ -383,15 +396,47 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+
+                            if (customer.modelOrImei.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.04),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.white10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.qr_code_2_rounded,
+                                        size: 14,
+                                        color: LiquidGlassTheme.neonEmerald),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'মডেল / IMEI / Serial: ${customer.modelOrImei}',
+                                      style: const TextStyle(
+                                        color: LiquidGlassTheme.neonEmerald,
+                                        fontSize: 11,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+
+                            const SizedBox(height: 14),
                             const Divider(color: Colors.white12),
                             const SizedBox(height: 10),
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 _buildHeaderBadge(
-                                  'গ্রাহক আইডি',
-                                  customer.id,
+                                  'ক্যাটাগরি',
+                                  customer.productCategory,
                                   LiquidGlassTheme.cyberCyan,
                                 ),
                                 _buildHeaderBadge(
@@ -416,38 +461,48 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
                       const SizedBox(height: 12),
 
-                      // Financial Ledger Card
+                      // Product Hire Purchase Ledger Card
                       LiquidGlassCard(
                         glowColor: LiquidGlassTheme.neonEmerald,
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'ঋণ ও কিস্তি বিবরণ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _buildStatCol('আসল ঋণ', _formatCurrency(customer.principalAmount)),
-                                _buildStatCol('লাভ/সুদ', '${customer.interestRate.toInt()}%'),
-                                _buildStatCol('মোট প্রদেয়', _formatCurrency(customer.totalPayable)),
+                                const Text(
+                                  'পণ্য বিক্রয় ও কিস্তি হিসাব',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                LiquidBadge(
+                                  label: 'ডাউন: ${_formatCurrency(customer.downPayment)}',
+                                  color: LiquidGlassTheme.cyberCyan,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _buildStatCol('পরিশোধিত', _formatCurrency(customer.totalPaid),
+                                _buildStatCol('নগদ মূল্য', _formatCurrency(customer.cashPrice)),
+                                _buildStatCol('কিস্তি মোট মূল্য', _formatCurrency(customer.installmentPrice)),
+                                _buildStatCol('ডাউন পেমেন্ট', _formatCurrency(customer.downPayment),
+                                    color: LiquidGlassTheme.cyberCyan),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildStatCol('মোট কিস্তি আদায়', _formatCurrency(customer.totalPaid),
                                     color: LiquidGlassTheme.neonEmerald),
                                 _buildStatCol('প্রতি কিস্তি', _formatCurrency(customer.installmentAmount)),
-                                _buildStatCol('অবশিষ্ট বকেয়া', _formatCurrency(customer.remainingAmount),
+                                _buildStatCol('বাকি কিস্তি বকেয়া', _formatCurrency(customer.remainingAmount),
                                     color: LiquidGlassTheme.sunsetCoral),
                               ],
                             ),
@@ -469,14 +524,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'কিস্তি প্রদান: ${customer.paidInstallments} / ${customer.totalInstallments} টি',
+                                  'কিস্তি জমা: ${customer.paidInstallments} / ${customer.totalInstallments} টি',
                                   style: const TextStyle(
                                     color: LiquidGlassTheme.textSecondary,
                                     fontSize: 12,
                                   ),
                                 ),
                                 Text(
-                                  '${(customer.progressPercentage * 100).toInt()}% সম্পন্ন',
+                                  '${(customer.progressPercentage * 100).toInt()}% পরিশোধিত',
                                   style: const TextStyle(
                                     color: LiquidGlassTheme.neonEmerald,
                                     fontSize: 12,
@@ -489,7 +544,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: LiquidButton(
-                                text: customer.isFullyPaid ? 'ঋণ পরিশোধিত ✓' : 'কিস্তি গ্রহণ করুন',
+                                text: customer.isFullyPaid
+                                    ? 'পণ্য কিস্তি পরিশোধিত ✓'
+                                    : 'কিস্তি গ্রহণ করুন',
                                 icon: Icons.payments_rounded,
                                 glowColor: customer.isFullyPaid
                                     ? LiquidGlassTheme.textMuted
@@ -498,6 +555,52 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                     ? () {}
                                     : () => _showCollectModal(customer),
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Guarantor & Customer info details
+                      const SizedBox(height: 12),
+                      LiquidGlassCard(
+                        glowColor: LiquidGlassTheme.electricViolet,
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'গ্রাহক ও জামিনদার তথ্য',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildInfoRow(
+                              Icons.location_on_rounded,
+                              'ঠিকানা',
+                              customer.address,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildInfoRow(
+                              Icons.badge_rounded,
+                              'এনআইডি / ভোটার আইডি',
+                              customer.nid,
+                            ),
+                            if (customer.guarantorName.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              _buildInfoRow(
+                                Icons.verified_user_rounded,
+                                'জামিনদার (গ্যারান্টার)',
+                                '${customer.guarantorName} (${customer.guarantorPhone})',
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            _buildInfoRow(
+                              Icons.calendar_month_rounded,
+                              'বিক্রয়ের তারিখ',
+                              DateFormat('dd MMMM yyyy').format(customer.startDate),
                             ),
                           ],
                         ),
@@ -558,8 +661,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           child: Row(
                             children: [
                               Container(
-                                width: 36,
-                                height: 36,
+                                width: 38,
+                                height: 38,
                                 decoration: BoxDecoration(
                                   color: LiquidGlassTheme.neonEmerald.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(10),
@@ -632,6 +735,33 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
   }
 
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: LiquidGlassTheme.cyberCyan),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            color: LiquidGlassTheme.textMuted,
+            fontSize: 12,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildHeaderBadge(String label, String value, Color color) {
     return Column(
       children: [
@@ -664,7 +794,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           value,
           style: TextStyle(
             color: color ?? Colors.white,
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
         ),

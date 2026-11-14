@@ -11,22 +11,36 @@ class KistiCalculatorScreen extends StatefulWidget {
 }
 
 class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
-  double _principal = 30000;
-  double _interestRate = 10;
-  int _installments = 25;
-  String _frequency = 'দৈনিক'; // 'দৈনিক', 'সাপ্তাহিক', 'মাসিক'
+  double _cashPrice = 45000;
+  double _downPayment = 10000;
+  int _durationMonths = 12;
+  double _markupRate = 10; // percent
+  String _productType = 'ফ্রিজ';
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat("#,##,##0", "en_US");
     return '৳ ${formatter.format(amount)}';
   }
 
+  void _applyPreset(String type, double price, double down, int months, double markup) {
+    setState(() {
+      _productType = type;
+      _cashPrice = price;
+      _downPayment = down;
+      _durationMonths = months;
+      _markupRate = markup;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final profit = _principal * (_interestRate / 100);
-    final totalPayable = _principal + profit;
-    final installmentAmount =
-        _installments > 0 ? (totalPayable / _installments).ceilToDouble() : 0.0;
+    final financedAmount = (_cashPrice - _downPayment).clamp(0.0, double.infinity);
+    final markupAmount = financedAmount * (_markupRate / 100);
+    final totalInstallmentPrice = _cashPrice + markupAmount;
+    final totalDueAfterDown = financedAmount + markupAmount;
+    final monthlyInstallment = _durationMonths > 0
+        ? (totalDueAfterDown / _durationMonths).ceilToDouble()
+        : 0.0;
 
     return Scaffold(
       backgroundColor: LiquidGlassTheme.bgDarkVoid,
@@ -46,7 +60,7 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      'স্মার্ট কিস্তি ক্যালকুলেটর',
+                      'পণ্য কিস্তি (EMI) ক্যালকুলেটর',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -70,7 +84,7 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                         child: Column(
                           children: [
                             const Text(
-                              'প্রতি কিস্তির পরিমাণ',
+                              'প্রতি মাসের কিস্তির পরিমাণ',
                               style: TextStyle(
                                 color: LiquidGlassTheme.textSecondary,
                                 fontSize: 13,
@@ -78,7 +92,7 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              _formatCurrency(installmentAmount),
+                              _formatCurrency(monthlyInstallment),
                               style: const TextStyle(
                                 color: LiquidGlassTheme.neonEmerald,
                                 fontSize: 36,
@@ -88,7 +102,7 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '$_frequency কিস্তি • মোট $_installments টি',
+                              '$_durationMonths মাস মেয়াদ • $_productType স্কিম',
                               style: const TextStyle(
                                 color: LiquidGlassTheme.cyberCyan,
                                 fontSize: 13,
@@ -101,13 +115,42 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                _buildSummaryCol('আসল ঋণ', _formatCurrency(_principal)),
-                                _buildSummaryCol('মোট মুনাফা', _formatCurrency(profit),
+                                _buildSummaryCol('নগদ মূল্য', _formatCurrency(_cashPrice)),
+                                _buildSummaryCol('ডাউন পেমেন্ট', _formatCurrency(_downPayment),
+                                    color: LiquidGlassTheme.cyberCyan),
+                                _buildSummaryCol('মোট কিস্তি মূল্য', _formatCurrency(totalInstallmentPrice),
                                     color: LiquidGlassTheme.amberGold),
-                                _buildSummaryCol('মোট প্রদেয়', _formatCurrency(totalPayable),
-                                    color: Colors.white),
                               ],
                             ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildSummaryCol('কিস্তি মুনাফা', _formatCurrency(markupAmount),
+                                    color: LiquidGlassTheme.electricViolet),
+                                _buildSummaryCol('বাকি প্রদেয়', _formatCurrency(totalDueAfterDown),
+                                    color: Colors.white),
+                                _buildSummaryCol('মুনাফা হার', '${_markupRate.toInt()}%',
+                                    color: LiquidGlassTheme.neonEmerald),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Product Quick Presets
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          children: [
+                            _buildPresetChip('📱 মোবাইল', 35000, 7000, 6, 8),
+                            _buildPresetChip('🧊 ফ্রিজ', 52000, 12000, 12, 10),
+                            _buildPresetChip('📺 স্মার্ট টিভি', 40000, 8000, 10, 10),
+                            _buildPresetChip('❄️ এসি', 75000, 20000, 18, 12),
+                            _buildPresetChip('🛵 বাইক', 160000, 40000, 24, 14),
                           ],
                         ),
                       ),
@@ -121,12 +164,12 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Principal Slider
+                            // Cash Price Slider
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text(
-                                  'আসল ঋণের পরিমাণ',
+                                  'পণ্যের নগদ মূল্য',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -134,7 +177,7 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                                   ),
                                 ),
                                 Text(
-                                  _formatCurrency(_principal),
+                                  _formatCurrency(_cashPrice),
                                   style: const TextStyle(
                                     color: LiquidGlassTheme.neonEmerald,
                                     fontSize: 16,
@@ -147,27 +190,32 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                               data: SliderTheme.of(context).copyWith(
                                 activeTrackColor: LiquidGlassTheme.neonEmerald,
                                 thumbColor: Colors.white,
-                                overlayColor:
-                                    LiquidGlassTheme.neonEmerald.withOpacity(0.2),
+                                overlayColor: LiquidGlassTheme.neonEmerald.withOpacity(0.2),
                               ),
                               child: Slider(
-                                value: _principal,
+                                value: _cashPrice,
                                 min: 5000,
                                 max: 200000,
                                 divisions: 39,
-                                onChanged: (val) =>
-                                    setState(() => _principal = val),
+                                onChanged: (val) {
+                                  setState(() {
+                                    _cashPrice = val;
+                                    if (_downPayment > _cashPrice) {
+                                      _downPayment = (_cashPrice * 0.2).roundToDouble();
+                                    }
+                                  });
+                                },
                               ),
                             ),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 14),
 
-                            // Interest Rate Slider
+                            // Down Payment Slider
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text(
-                                  'সুদ / মুনাফার হার',
+                                  'ডাউন পেমেন্ট (অগ্রিম)',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -175,51 +223,10 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '${_interestRate.toStringAsFixed(1)}%',
-                                  style: const TextStyle(
-                                    color: LiquidGlassTheme.amberGold,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                activeTrackColor: LiquidGlassTheme.amberGold,
-                                thumbColor: Colors.white,
-                                overlayColor:
-                                    LiquidGlassTheme.amberGold.withOpacity(0.2),
-                              ),
-                              child: Slider(
-                                value: _interestRate,
-                                min: 0,
-                                max: 30,
-                                divisions: 60,
-                                onChanged: (val) =>
-                                    setState(() => _interestRate = val),
-                              ),
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            // Total Installments Slider
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'কিস্তির সংখ্যা',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  '$_installments টি',
+                                  '${_formatCurrency(_downPayment)} (${((_downPayment / (_cashPrice > 0 ? _cashPrice : 1)) * 100).toInt()}%)',
                                   style: const TextStyle(
                                     color: LiquidGlassTheme.cyberCyan,
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -229,69 +236,93 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                               data: SliderTheme.of(context).copyWith(
                                 activeTrackColor: LiquidGlassTheme.cyberCyan,
                                 thumbColor: Colors.white,
-                                overlayColor:
-                                    LiquidGlassTheme.cyberCyan.withOpacity(0.2),
+                                overlayColor: LiquidGlassTheme.cyberCyan.withOpacity(0.2),
                               ),
                               child: Slider(
-                                value: _installments.toDouble(),
-                                min: 5,
-                                max: 100,
-                                divisions: 95,
-                                onChanged: (val) =>
-                                    setState(() => _installments = val.toInt()),
+                                value: _downPayment.clamp(0.0, _cashPrice),
+                                min: 0,
+                                max: _cashPrice,
+                                divisions: 20,
+                                onChanged: (val) => setState(() => _downPayment = val),
                               ),
                             ),
 
                             const SizedBox(height: 14),
 
-                            // Frequency Selector
-                            const Text(
-                              'কিস্তির সময়কাল',
-                              style: TextStyle(
-                                color: LiquidGlassTheme.textSecondary,
-                                fontSize: 13,
+                            // Duration Slider
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'কিস্তির মেয়াদ (মাস)',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  '$_durationMonths মাস',
+                                  style: const TextStyle(
+                                    color: LiquidGlassTheme.amberGold,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                activeTrackColor: LiquidGlassTheme.amberGold,
+                                thumbColor: Colors.white,
+                                overlayColor: LiquidGlassTheme.amberGold.withOpacity(0.2),
+                              ),
+                              child: Slider(
+                                value: _durationMonths.toDouble(),
+                                min: 2,
+                                max: 24,
+                                divisions: 22,
+                                onChanged: (val) => setState(() => _durationMonths = val.toInt()),
                               ),
                             ),
-                            const SizedBox(height: 8),
+
+                            const SizedBox(height: 14),
+
+                            // Markup Rate Slider
                             Row(
-                              children: ['দৈনিক', 'সাপ্তাহিক', 'মাসিক'].map((f) {
-                                final isSel = _frequency == f;
-                                return Expanded(
-                                  child: GestureDetector(
-                                    onTap: () => setState(() => _frequency = f),
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: isSel
-                                            ? LiquidGlassTheme.cyberCyan
-                                                .withOpacity(0.25)
-                                            : Colors.white.withOpacity(0.04),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSel
-                                              ? LiquidGlassTheme.cyberCyan
-                                              : Colors.white.withOpacity(0.1),
-                                        ),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        f,
-                                        style: TextStyle(
-                                          color: isSel
-                                              ? Colors.white
-                                              : Colors.white70,
-                                          fontWeight: isSel
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'কিস্তি অতিরিক্ত লাভ / মার্কআপ হার',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                );
-                              }).toList(),
+                                ),
+                                Text(
+                                  '${_markupRate.toInt()}%',
+                                  style: const TextStyle(
+                                    color: LiquidGlassTheme.electricViolet,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                activeTrackColor: LiquidGlassTheme.electricViolet,
+                                thumbColor: Colors.white,
+                                overlayColor: LiquidGlassTheme.electricViolet.withOpacity(0.2),
+                              ),
+                              child: Slider(
+                                value: _markupRate,
+                                min: 0,
+                                max: 25,
+                                divisions: 25,
+                                onChanged: (val) => setState(() => _markupRate = val),
+                              ),
                             ),
                           ],
                         ),
@@ -299,45 +330,51 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Quick Scheme Recommendations
+                      // Installment Schedule Preview Card
                       LiquidGlassCard(
+                        glowColor: LiquidGlassTheme.neonEmerald,
                         padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'জনপ্রিয় কিস্তি স্কিমসমূহ',
+                              'কিস্তি পরিশোধ সময়সূচী (প্রথম ৩টি কিস্তি)',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            _buildPresetTile('ক্ষুদ্র ব্যবসা দৈনিক স্কিম', '৳২০,০০০ • ২০ কিস্তি • দৈনিক ১,১০০', () {
-                              setState(() {
-                                _principal = 20000;
-                                _interestRate = 10;
-                                _installments = 20;
-                                _frequency = 'দৈনিক';
-                              });
-                            }),
-                            _buildPresetTile('দোকান সাপ্তাহিক স্কিম', '৳৫০,০০০ • ২৫ কিস্তি • সাপ্তাহিক ২,২০০', () {
-                              setState(() {
-                                _principal = 50000;
-                                _interestRate = 10;
-                                _installments = 25;
-                                _frequency = 'সাপ্তাহিক';
-                              });
-                            }),
-                            _buildPresetTile('মাসিক মাঝারি স্কিম', '৳১,০০,০০০ • ১২ কিস্তি • মাসিক ৯,৫০০', () {
-                              setState(() {
-                                _principal = 100000;
-                                _interestRate = 14;
-                                _installments = 12;
-                                _frequency = 'মাসিক';
-                              });
-                            }),
+                            ...List.generate(
+                              _durationMonths > 3 ? 3 : _durationMonths,
+                              (idx) {
+                                final dueMonth = DateTime.now().add(Duration(days: 30 * (idx + 1)));
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'কিস্তি #${idx + 1} (${DateFormat("MMM yyyy").format(dueMonth)})',
+                                        style: const TextStyle(
+                                          color: LiquidGlassTheme.textSecondary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        _formatCurrency(monthlyInstallment),
+                                        style: const TextStyle(
+                                          color: LiquidGlassTheme.neonEmerald,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -346,6 +383,37 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetChip(
+      String label, double price, double down, int months, double markup) {
+    final isSelected = _productType == label.split(' ').last;
+    return GestureDetector(
+      onTap: () => _applyPreset(label.split(' ').last, price, down, months, markup),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? LiquidGlassTheme.neonEmerald.withOpacity(0.2)
+              : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? LiquidGlassTheme.neonEmerald
+                : Colors.white.withOpacity(0.12),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? LiquidGlassTheme.neonEmerald : Colors.white70,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
@@ -372,54 +440,6 @@ class _KistiCalculatorScreenState extends State<KistiCalculatorScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPresetTile(String title, String desc, VoidCallback onTap) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    desc,
-                    style: const TextStyle(
-                      color: LiquidGlassTheme.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-              const Icon(
-                Icons.touch_app_rounded,
-                size: 18,
-                color: LiquidGlassTheme.cyberCyan,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

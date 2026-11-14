@@ -18,12 +18,13 @@ class MoreScreen extends StatelessWidget {
   }
 
   void _showReportDialog(BuildContext context) {
-    final totalDisbursed = storage.totalPrincipalDisbursed;
-    final totalReceivable = storage.totalExpectedReceivable;
-    final totalCollected = storage.totalCollectedAllTime;
-    final totalOutstanding = storage.totalOutstanding;
-    final recoveryRate = totalReceivable > 0
-        ? ((totalCollected / totalReceivable) * 100).toStringAsFixed(1)
+    final totalSales = storage.totalProductSalesValue;
+    final totalDown = storage.totalDownPaymentCollected;
+    final totalKistiColl = storage.totalInstallmentCollectedAllTime;
+    final totalCollected = totalDown + totalKistiColl;
+    final totalOutstanding = storage.totalOutstandingKisti;
+    final recoveryRate = totalSales > 0
+        ? ((totalCollected / totalSales) * 100).toStringAsFixed(1)
         : '0.0';
 
     showDialog(
@@ -43,7 +44,7 @@ class MoreScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'আর্থিক রিপোর্ট ও সারসংক্ষেপ',
+                      'বিক্রয় ও কিস্তি অডিট রিপোর্ট',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -57,17 +58,22 @@ class MoreScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
-                _buildReportItem('মোট ঋণ বিতরণ', _formatCurrency(totalDisbursed)),
-                _buildReportItem('মোট প্রদেয় লক্ষ্যমাত্রা', _formatCurrency(totalReceivable)),
-                _buildReportItem('মোট আদায়কৃত টাকা', _formatCurrency(totalCollected),
+                _buildReportItem('মোট পণ্য বিক্রয় মূল্য', _formatCurrency(totalSales)),
+                _buildReportItem('মোট ডাউন পেমেন্ট আদায়', _formatCurrency(totalDown),
+                    color: LiquidGlassTheme.cyberCyan),
+                _buildReportItem('মোট কিস্তি আদায়', _formatCurrency(totalKistiColl),
                     color: LiquidGlassTheme.neonEmerald),
-                _buildReportItem('বর্তমান মোট বকেয়া', _formatCurrency(totalOutstanding),
+                _buildReportItem('সর্বমোট সংগৃহীত তহবিল', _formatCurrency(totalCollected),
+                    color: LiquidGlassTheme.neonEmerald),
+                _buildReportItem('বর্তমান বকেয়া কিস্তি', _formatCurrency(totalOutstanding),
                     color: LiquidGlassTheme.sunsetCoral),
                 _buildReportItem('আদায় অগ্রগতি হার', '$recoveryRate%',
-                    color: LiquidGlassTheme.cyberCyan),
-                _buildReportItem('সক্রিয় ঋণগ্রহীতা', '${storage.activeCustomersCount} জন'),
-                _buildReportItem('পরিশোধিত ঋণগ্রহীতা', '${storage.completedCustomersCount} জন'),
-                _buildReportItem('খেলাপী ঋণগ্রহীতা', '${storage.overdueCustomersCount} জন',
+                    color: LiquidGlassTheme.amberGold),
+                const Divider(color: Colors.white12, height: 20),
+                _buildReportItem('মোট বিক্রিত পণ্য সংখ্যা', '${storage.customers.length} টি'),
+                _buildReportItem('চলতি কিস্তি গ্রাহক', '${storage.activeCustomersCount} জন'),
+                _buildReportItem('পরিশোধিত পণ্য কিস্তি', '${storage.completedCustomersCount} টি'),
+                _buildReportItem('খেলাপী / বকেয়া কিস্তি', '${storage.overdueCustomersCount} জন',
                     color: LiquidGlassTheme.sunsetCoral),
                 const SizedBox(height: 18),
                 SizedBox(
@@ -116,7 +122,7 @@ class MoreScreen extends StatelessWidget {
       'customers': storage.customers.map((c) => c.toJson()).toList(),
       'collections': storage.collections.map((c) => c.toJson()).toList(),
       'exportDate': DateTime.now().toIso8601String(),
-      'app': 'Kisti Seba v1.0.0',
+      'app': 'Kisti Seba v1.0.1 (Product Installment Sales)',
     };
     final jsonStr = const JsonEncoder.withIndent('  ').convert(exportData);
 
@@ -143,7 +149,7 @@ class MoreScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'আপনার সকল গ্রাহক ও কিস্তি আদায়ের ডেটা নিচে JSON ফরমেটে সুরক্ষিত আছে:',
+                  'আপনার শো-রুমের সকল পণ্য বিক্রয় ও কিস্তি আদায়ের ডেটা JSON ফরমেটে সুরক্ষিত:',
                   style: TextStyle(
                     color: LiquidGlassTheme.textSecondary,
                     fontSize: 12,
@@ -205,7 +211,7 @@ class MoreScreen extends StatelessWidget {
     );
   }
 
-  void _showLoanSchemesDialog(BuildContext context) {
+  void _showProductSchemesDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) {
@@ -220,7 +226,7 @@ class MoreScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'ঋণ ও সঞ্চয় স্কিমসমূহ',
+                  'পণ্য কিস্তি পলিসি ও স্কিমসমূহ',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -229,18 +235,23 @@ class MoreScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 _buildSchemeCard(
-                  'দৈনিক ক্ষুদ্রঋণ (Micro)',
-                  'মেয়াদ: ২০-৩০ দিন • সুদ: ১০%\nহকার ও কাঁচাবাজার ব্যবসায়ীদের জন্য দ্রুত কিস্তি সুবিধা।',
+                  '📱 স্মার্টফোন ও গ্যাজেট কিস্তি',
+                  'ডাউন পেমেন্ট: ২০%-৩০% • মেয়াদ: ৩-১২ মাস\nঅফিসিয়াল ওয়ারেন্টি ও ক্যাশলেস মাসিক কিস্তি সুবিধা।',
                   LiquidGlassTheme.neonEmerald,
                 ),
                 _buildSchemeCard(
-                  'সাপ্তাহিক বাণিজ্যিক ঋণ (SME)',
-                  'মেয়াদ: ২০-৫০ সপ্তাহ • সুদ: ১২%\nমুদি দোকান ও স্থায়ী ব্যবসায়ীদের উপযোগী সহজ কিস্তি।',
+                  '🧊 ফ্রিজ ও ডিপ ফ্রিজার কিস্তি',
+                  'ডাউন পেমেন্ট: ১৫%-২৫% • মেয়াদ: ৬-১৮ মাস\nবাসাবাড়ি ও বাণিজ্যিক ব্যবহারের জন্য সহজ কিস্তিতে ডেলিভারি।',
                   LiquidGlassTheme.cyberCyan,
                 ),
                 _buildSchemeCard(
-                  'মাসিক সঞ্চয় ও প্রজেক্ট লোন',
-                  'মেয়াদ: ৬-১২ মাস • সুদ: ১৫%\nউদ্যোক্তা ও পাইকারি ব্যবসায়ীদের বড় অঙ্কের ঋণ।',
+                  '📺 স্মার্ট টিভি ও বিনোদন হোম থিয়েটার',
+                  'ডাউন পেমেন্ট: ২০% • মেয়াদ: ৬-১২ মাস\nস্মার্ট অ্যান্ড্রয়েড টিভি, সাউন্ড সিস্টেম কিস্তিতে বিক্রয়।',
+                  LiquidGlassTheme.amberGold,
+                ),
+                _buildSchemeCard(
+                  '❄️ এসি ও মৌসুমী অ্যাপ্লায়েন্স স্কিম',
+                  'ডাউন পেমেন্ট: ২৫% • মেয়াদ: ১২-২৪ মাস\nইনভার্টার এসি ফ্রি ইনস্টলেশন ও দীর্ঘমেয়াদী কিস্তি।',
                   LiquidGlassTheme.electricViolet,
                 ),
                 const SizedBox(height: 12),
@@ -309,7 +320,7 @@ class MoreScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text(
-                    'আরও সেবা ও সেটিংস',
+                    'আরও সেবা ও শো-রুম সেটিংস',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -317,7 +328,7 @@ class MoreScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'টুলস, এনালিটিক্স ও সিস্টেম কন্ট্রোল',
+                    'পণ্য কিস্তি টুলস, রিপোর্ট ও সিস্টেম কন্ট্রোল',
                     style: TextStyle(
                       color: LiquidGlassTheme.textSecondary,
                       fontSize: 12,
@@ -361,7 +372,7 @@ class MoreScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'স্মার্ট কিস্তি ক্যালকুলেটর',
+                            'পণ্য কিস্তি (EMI) ক্যালকুলেটর',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -370,7 +381,7 @@ class MoreScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'ঋণ, সুদের হার ও কিস্তির পরিমাণ মুহূর্তেই গণনা করুন',
+                            'মোবাইল, ফ্রিজ, টিভি কিস্তির নগদ মূল্য ও ডাউন পেমেন্ট হিসাব',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
@@ -413,7 +424,7 @@ class MoreScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'আর্থিক স্টেটমেন্ট ও রিপোর্ট',
+                            'বিক্রয় ও কিস্তি অডিট রিপোর্ট',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -422,7 +433,7 @@ class MoreScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'বিতরণ, আদায় ও সার্বিক অগ্রগতির রিয়েল-টাইম রিপোর্ট',
+                            'মোট বিক্রয়, ডাউন পেমেন্ট ও বাকি বকেয়ার সামারি',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
@@ -443,7 +454,7 @@ class MoreScreen extends StatelessWidget {
               LiquidGlassCard(
                 glowColor: LiquidGlassTheme.amberGold,
                 padding: const EdgeInsets.all(16),
-                onTap: () => _showLoanSchemesDialog(context),
+                onTap: () => _showProductSchemesDialog(context),
                 child: Row(
                   children: [
                     Container(
@@ -454,7 +465,7 @@ class MoreScreen extends StatelessWidget {
                         border: Border.all(color: LiquidGlassTheme.amberGold),
                       ),
                       child: const Icon(
-                        Icons.workspace_premium_rounded,
+                        Icons.inventory_2_rounded,
                         color: LiquidGlassTheme.amberGold,
                         size: 24,
                       ),
@@ -465,7 +476,7 @@ class MoreScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'ঋণ স্কিম ও প্যাকেজসমূহ',
+                            'পণ্য কিস্তি পলিসি ও স্কিমসমূহ',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -474,7 +485,7 @@ class MoreScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'দৈনিক, সাপ্তাহিক ও মাসিক স্কিমের শর্তাবলী ও বিবরণ',
+                            'মোবাইল, ফ্রিজ, টিভি, এসির কিস্তির শর্ত ও ওয়ারেন্টি নিয়মাবলী',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
@@ -506,7 +517,7 @@ class MoreScreen extends StatelessWidget {
                         border: Border.all(color: LiquidGlassTheme.electricViolet),
                       ),
                       child: const Icon(
-                        Icons.cloud_sync_rounded,
+                        Icons.backup_rounded,
                         color: LiquidGlassTheme.electricViolet,
                         size: 24,
                       ),
@@ -526,7 +537,7 @@ class MoreScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'নিরাপদে সকল কিস্তির তথ্য JSON ফাইলে সেভ করুন',
+                            'সকল বিক্রয় ও কিস্তির খতিয়ান সুরক্ষিত রাখুন',
                             style: TextStyle(
                               color: LiquidGlassTheme.textSecondary,
                               fontSize: 12,
@@ -548,51 +559,65 @@ class MoreScreen extends StatelessWidget {
 
               // App Info Card
               LiquidGlassCard(
-                padding: const EdgeInsets.all(18),
+                glowColor: LiquidGlassTheme.neonEmerald,
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: LiquidGlassTheme.neonEmerald.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: const LinearGradient(
+                              colors: [
+                                LiquidGlassTheme.cyberCyan,
+                                LiquidGlassTheme.neonEmerald,
+                              ],
+                            ),
                           ),
+                          alignment: Alignment.center,
                           child: const Icon(
-                            Icons.info_outline_rounded,
-                            color: LiquidGlassTheme.neonEmerald,
-                            size: 20,
+                            Icons.storefront_rounded,
+                            color: Colors.black,
+                            size: 26,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Kisti Seba (কিস্তি সেবা)',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Kisti (কিস্তি সেবা)',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Package: com.kisti.seba • v1.0.0',
-                              style: TextStyle(
-                                color: LiquidGlassTheme.textMuted,
-                                fontSize: 11,
+                              Text(
+                                'ভার্সন ১.০.১ • পণ্য কিস্তি ম্যানেজমেন্ট প্ল্যাটফর্ম',
+                                style: TextStyle(
+                                  color: LiquidGlassTheme.textSecondary,
+                                  fontSize: 11,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                        const LiquidBadge(
+                          label: 'v1.0.1',
+                          color: LiquidGlassTheme.neonEmerald,
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      'আধুনিক ফিউচারিস্টিক লিকুইড গ্লাস এফেক্ট সহ পূর্ণাঙ্গ মাইক্রোফাইন্যান্স ও কিস্তি হিসাব ট্র্যাকার। সম্পূর্ণ অফলাইনে নিরাপদে কাজ করে।',
+                      'ইলেকট্রনিক্স শো-রুম, মোবাইল শপ ও হোম অ্যাপ্লায়েন্সের পণ্য সহজ কিস্তিতে বিক্রয় ও স্বয়ংক্রিয় খতিয়ান পরিচালনার ফিউচারিস্টিক লিকুইড গ্লাস সমাধান।',
                       style: TextStyle(
-                        color: LiquidGlassTheme.textSecondary,
+                        color: LiquidGlassTheme.textMuted,
                         fontSize: 12,
                         height: 1.4,
                       ),

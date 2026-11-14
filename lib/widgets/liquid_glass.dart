@@ -373,6 +373,7 @@ class LiquidTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Widget? suffix;
+  final ValueChanged<String>? onChanged;
 
   const LiquidTextField({
     super.key,
@@ -383,6 +384,7 @@ class LiquidTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.suffix,
+    this.onChanged,
   });
 
   @override
@@ -407,6 +409,7 @@ class LiquidTextField extends StatelessWidget {
               controller: controller,
               keyboardType: keyboardType,
               validator: validator,
+              onChanged: onChanged,
               style: const TextStyle(
                 color: LiquidGlassTheme.textPrimary,
                 fontSize: 15,

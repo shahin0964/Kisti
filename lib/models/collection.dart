@@ -2,10 +2,11 @@ class CollectionRecord {
   final String id;
   final String customerId;
   final String customerName;
+  final String productName; // পণ্যের নাম
   final double amount;
   final DateTime date;
   final int installmentIndex;
-  final String paymentMethod; // 'নগদ', 'বিকাশ', 'নগদ-অ্যাপ', 'রকেট'
+  final String paymentMethod; // 'নগদ', 'বিকাশ', 'নগদ-অ্যাপ', 'রকেট', 'ব্যাংক'
   final String collector;
   final String receiptNo;
   final String note;
@@ -14,6 +15,7 @@ class CollectionRecord {
     required this.id,
     required this.customerId,
     required this.customerName,
+    this.productName = '',
     required this.amount,
     required this.date,
     required this.installmentIndex,
@@ -28,6 +30,7 @@ class CollectionRecord {
       'id': id,
       'customerId': customerId,
       'customerName': customerName,
+      'productName': productName,
       'amount': amount,
       'date': date.toIso8601String(),
       'installmentIndex': installmentIndex,
@@ -43,6 +46,7 @@ class CollectionRecord {
       id: json['id'] as String,
       customerId: json['customerId'] as String,
       customerName: json['customerName'] as String,
+      productName: (json['productName'] ?? '') as String,
       amount: (json['amount'] as num).toDouble(),
       date: DateTime.parse(json['date'] as String),
       installmentIndex: json['installmentIndex'] as int,

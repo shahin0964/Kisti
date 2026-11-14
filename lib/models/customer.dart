@@ -1,18 +1,23 @@
 class Customer {
   final String id;
-  final String name;
-  final String phone;
-  final String address;
-  final String nid;
-  final double principalAmount; // আসল ঋণ
-  final double interestRate; // লাভ / সুদের হার (%)
-  final double totalPayable; // মোট প্রদেয় টাকা
+  final String name; // ক্রেতার নাম
+  final String phone; // মোবাইল নম্বর
+  final String address; // ঠিকানা
+  final String nid; // জাতীয় পরিচয়পত্র
+  final String guarantorName; // জামিনদার / গ্যারান্টারের নাম
+  final String guarantorPhone; // জামিনদারের মোবাইল
+  final String productName; // পণ্যের নাম (যেমন: Walton 250L Fridge, Samsung 43" TV)
+  final String productCategory; // 'মোবাইল', 'ফ্রিজ', 'টিভি', 'এসি', 'অন্যান্য'
+  final String modelOrImei; // মডেল / সিরিয়াল / IMEI নম্বর
+  final double cashPrice; // নগদ মূল্য
+  final double installmentPrice; // কিস্তিতে মোট বিক্রয় মূল্য
+  final double downPayment; // ডাউন পেমেন্ট / অগ্রিম
   final double installmentAmount; // প্রতি কিস্তির টাকা
-  final String frequency; // 'দৈনিক', 'সাপ্তাহিক', 'মাসিক'
+  final String frequency; // 'মাসিক', 'সাপ্তাহিক', 'দৈনিক'
   final int totalInstallments; // মোট কিস্তির সংখ্যা
   int paidInstallments; // কতটি কিস্তি পরিশোধ হয়েছে
-  double totalPaid; // মোট পরিশোধিত টাকা
-  final DateTime startDate;
+  double totalInstallmentPaid; // কিস্তিতে মোট পরিশোধিত টাকা
+  final DateTime startDate; // ক্রয়ের তারিখ
   String status; // 'চলমান', 'পরিশোধিত', 'বকেয়া'
 
   Customer({
@@ -21,38 +26,58 @@ class Customer {
     required this.phone,
     required this.address,
     required this.nid,
-    required this.principalAmount,
-    this.interestRate = 10.0,
-    required this.totalPayable,
+    this.guarantorName = '',
+    this.guarantorPhone = '',
+    required this.productName,
+    required this.productCategory,
+    this.modelOrImei = '',
+    required this.cashPrice,
+    required this.installmentPrice,
+    required this.downPayment,
     required this.installmentAmount,
-    required this.frequency,
+    this.frequency = 'মাসিক',
     required this.totalInstallments,
     this.paidInstallments = 0,
-    this.totalPaid = 0.0,
+    this.totalInstallmentPaid = 0.0,
     required this.startDate,
     this.status = 'চলমান',
   });
 
-  double get remainingAmount => (totalPayable - totalPaid).clamp(0.0, totalPayable);
+  // আসল কিস্তির ঋণ (ডাউন পেমেন্ট বাদে)
+  double get financedAmount => (installmentPrice - downPayment).clamp(0.0, installmentPrice);
 
+  // অবশিষ্ট বকেয়া কিস্তি
+  double get remainingAmount => (financedAmount - totalInstallmentPaid).clamp(0.0, financedAmount);
+
+  // মোট জমা (ডাউন পেমেন্ট + কিস্তি)
+  double get totalCollected => downPayment + totalInstallmentPaid;
+
+  // সামগ্রিক পরিশোধের শতকরা হার
   double get progressPercentage {
-    if (totalPayable == 0) return 1.0;
-    return (totalPaid / totalPayable).clamp(0.0, 1.0);
+    if (installmentPrice == 0) return 1.0;
+    return (totalCollected / installmentPrice).clamp(0.0, 1.0);
   }
 
-  bool get isFullyPaid => totalPaid >= totalPayable || paidInstallments >= totalInstallments;
+  // মোট কিস্তি আদায়
+  double get totalPaid => totalInstallmentPaid;
 
-  DateTime get nextDueDate {
-    if (frequency == 'দৈনিক') {
-      return startDate.add(Duration(days: paidInstallments + 1));
-    } else if (frequency == 'সাপ্তাহিক') {
-      return startDate.add(Duration(days: (paidInstallments + 1) * 7));
-    } else {
-      return DateTime(
-        startDate.year,
-        startDate.month + (paidInstallments + 1),
-        startDate.day,
-      );
+  bool get isFullyPaid =>
+      totalCollected >= installmentPrice || paidInstallments >= totalInstallments;
+
+  String get categoryIcon {
+    switch (productCategory) {
+      case 'মোবাইল':
+        return '📱';
+      case 'ফ্রিজ':
+        return '🧊';
+      case 'টিভি':
+        return '📺';
+      case 'এসি':
+        return '❄️';
+      case 'বাইক':
+        return '🛵';
+      default:
+        return '📦';
     }
   }
 
@@ -63,14 +88,19 @@ class Customer {
       'phone': phone,
       'address': address,
       'nid': nid,
-      'principalAmount': principalAmount,
-      'interestRate': interestRate,
-      'totalPayable': totalPayable,
+      'guarantorName': guarantorName,
+      'guarantorPhone': guarantorPhone,
+      'productName': productName,
+      'productCategory': productCategory,
+      'modelOrImei': modelOrImei,
+      'cashPrice': cashPrice,
+      'installmentPrice': installmentPrice,
+      'downPayment': downPayment,
       'installmentAmount': installmentAmount,
       'frequency': frequency,
       'totalInstallments': totalInstallments,
       'paidInstallments': paidInstallments,
-      'totalPaid': totalPaid,
+      'totalInstallmentPaid': totalInstallmentPaid,
       'startDate': startDate.toIso8601String(),
       'status': status,
     };
@@ -83,14 +113,20 @@ class Customer {
       phone: json['phone'] as String,
       address: json['address'] as String,
       nid: (json['nid'] ?? '') as String,
-      principalAmount: (json['principalAmount'] as num).toDouble(),
-      interestRate: (json['interestRate'] as num?)?.toDouble() ?? 10.0,
-      totalPayable: (json['totalPayable'] as num).toDouble(),
+      guarantorName: (json['guarantorName'] ?? '') as String,
+      guarantorPhone: (json['guarantorPhone'] ?? '') as String,
+      productName: (json['productName'] ?? 'পণ্য') as String,
+      productCategory: (json['productCategory'] ?? 'অন্যান্য') as String,
+      modelOrImei: (json['modelOrImei'] ?? '') as String,
+      cashPrice: (json['cashPrice'] as num?)?.toDouble() ?? 0.0,
+      installmentPrice: (json['installmentPrice'] as num).toDouble(),
+      downPayment: (json['downPayment'] as num?)?.toDouble() ?? 0.0,
       installmentAmount: (json['installmentAmount'] as num).toDouble(),
-      frequency: json['frequency'] as String,
+      frequency: (json['frequency'] ?? 'মাসিক') as String,
       totalInstallments: json['totalInstallments'] as int,
       paidInstallments: (json['paidInstallments'] as int?) ?? 0,
-      totalPaid: (json['totalPaid'] as num?)?.toDouble() ?? 0.0,
+      totalInstallmentPaid: (json['totalInstallmentPaid'] as num?)?.toDouble() ??
+          ((json['totalPaid'] as num?)?.toDouble() ?? 0.0),
       startDate: DateTime.parse(json['startDate'] as String),
       status: (json['status'] as String?) ?? 'চলমান',
     );
