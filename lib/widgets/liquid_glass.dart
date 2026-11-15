@@ -39,22 +39,22 @@ class _LiquidBackgroundState extends State<LiquidBackground>
         final val = _controller.value;
         return Stack(
           children: [
-            // Dark obsidian gradient base
+            // Dynamic liquid gradient base
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFF04070D),
-                    Color(0xFF090E18),
-                    Color(0xFF06090F),
+                    LiquidGlassTheme.activeBgDarkVoid,
+                    LiquidGlassTheme.activeBgMidnight,
+                    LiquidGlassTheme.activeBgDarkVoid,
                   ],
                 ),
               ),
             ),
 
-            // Top-left Glowing Cyber Cyan Orb
+            // Top-left Glowing Orb 1
             Positioned(
               top: -80 + (val * 40),
               left: -60 + (val * 30),
@@ -65,8 +65,8 @@ class _LiquidBackgroundState extends State<LiquidBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      LiquidGlassTheme.cyberCyan.withOpacity(0.22),
-                      LiquidGlassTheme.cyberCyan.withOpacity(0.06),
+                      LiquidGlassTheme.activeOrb1.withOpacity(0.22),
+                      LiquidGlassTheme.activeOrb1.withOpacity(0.06),
                       Colors.transparent,
                     ],
                   ),
@@ -74,7 +74,7 @@ class _LiquidBackgroundState extends State<LiquidBackground>
               ),
             ),
 
-            // Mid-Right Glowing Neon Emerald Orb
+            // Mid-Right Glowing Orb 2
             Positioned(
               top: 220 - (val * 50),
               right: -80 - (val * 20),
@@ -85,8 +85,8 @@ class _LiquidBackgroundState extends State<LiquidBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      LiquidGlassTheme.neonEmerald.withOpacity(0.20),
-                      LiquidGlassTheme.neonEmerald.withOpacity(0.04),
+                      LiquidGlassTheme.activeOrb2.withOpacity(0.20),
+                      LiquidGlassTheme.activeOrb2.withOpacity(0.04),
                       Colors.transparent,
                     ],
                   ),
@@ -94,7 +94,7 @@ class _LiquidBackgroundState extends State<LiquidBackground>
               ),
             ),
 
-            // Bottom-Left Glowing Electric Violet Orb
+            // Bottom-Left Glowing Orb 3
             Positioned(
               bottom: -40 + (val * 60),
               left: -40 + (val * 40),
@@ -105,8 +105,8 @@ class _LiquidBackgroundState extends State<LiquidBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      LiquidGlassTheme.electricViolet.withOpacity(0.24),
-                      LiquidGlassTheme.electricViolet.withOpacity(0.05),
+                      LiquidGlassTheme.activeOrb3.withOpacity(0.22),
+                      LiquidGlassTheme.activeOrb3.withOpacity(0.04),
                       Colors.transparent,
                     ],
                   ),

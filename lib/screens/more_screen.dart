@@ -1454,18 +1454,260 @@ class _MoreScreenState extends State<MoreScreen> {
   }
 
   // ==========================================
-  // 5. APP ABOUT MODAL ("choto page show korbe")
+  // 5. THEME SELECTION MODAL
+  // ==========================================
+  void _showThemeSelectionDialog(BuildContext context) {
+    final storage = widget.storage;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.75),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            final activeId = storage.themeId;
+
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+              child: LiquidGlassCard(
+                borderRadius: 20,
+                glowColor: LiquidGlassTheme.neonEmerald,
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: LiquidGlassTheme.neonEmerald.withOpacity(0.2),
+                              border: Border.all(color: LiquidGlassTheme.neonEmerald),
+                            ),
+                            child: const Icon(
+                              Icons.palette_rounded,
+                              color: LiquidGlassTheme.neonEmerald,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'অ্যাপ থিম ও রঙ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'পছন্দের কালার প্যালেট নির্বাচন করুন',
+                                  style: TextStyle(
+                                    color: LiquidGlassTheme.textSecondary,
+                                    fontSize: 10.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white60, size: 18),
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Presets List
+                      ...LiquidGlassTheme.presets.map((preset) {
+                        final isSelected = activeId == preset.id;
+                        return GestureDetector(
+                          onTap: () async {
+                            await storage.setThemeId(preset.id);
+                            setDialogState(() {});
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('থিম পরিবর্তিত হয়েছে: ${preset.name}'),
+                                backgroundColor: preset.neonEmerald,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? preset.neonEmerald.withOpacity(0.14)
+                                  : Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected
+                                    ? preset.neonEmerald
+                                    : Colors.white.withOpacity(0.10),
+                                width: isSelected ? 1.5 : 1,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: preset.neonEmerald.withOpacity(0.25),
+                                        blurRadius: 10,
+                                        spreadRadius: -2,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              children: [
+                                // Preset Icon
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: preset.bgCard,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: preset.neonEmerald.withOpacity(0.4)),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      preset.icon,
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+
+                                // Preset Name & Subtitle
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            preset.name,
+                                            style: TextStyle(
+                                              color: isSelected ? preset.neonEmerald : Colors.white,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          if (isSelected) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                              decoration: BoxDecoration(
+                                                color: preset.neonEmerald.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(6),
+                                                border: Border.all(color: preset.neonEmerald.withOpacity(0.5)),
+                                              ),
+                                              child: Text(
+                                                'সক্রিয়',
+                                                style: TextStyle(
+                                                  color: preset.neonEmerald,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        preset.subtitle,
+                                        style: const TextStyle(
+                                          color: LiquidGlassTheme.textSecondary,
+                                          fontSize: 10,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+
+                                // Color preview dots
+                                Row(
+                                  children: [
+                                    _buildColorDot(preset.neonEmerald),
+                                    const SizedBox(width: 3),
+                                    _buildColorDot(preset.cyberCyan),
+                                    const SizedBox(width: 3),
+                                    _buildColorDot(preset.electricViolet),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+
+                      const SizedBox(height: 6),
+
+                      // Done Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: LiquidGlassButton(
+                          text: 'সম্পন্ন',
+                          icon: Icons.check_circle_rounded,
+                          glowColor: LiquidGlassTheme.neonEmerald,
+                          height: 40,
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildColorDot(Color color) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.6),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 6. APP ABOUT MODAL ("choto page show korbe")
   // ==========================================
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
         child: LiquidGlassCard(
-          borderRadius: 24,
+          borderRadius: 20,
           glowColor: LiquidGlassTheme.neonEmerald,
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1501,7 +1743,7 @@ class _MoreScreenState extends State<MoreScreen> {
                   border: Border.all(color: LiquidGlassTheme.neonEmerald.withOpacity(0.4)),
                 ),
                 child: const Text(
-                  'ভার্সন v1.0.5 (Build 6)',
+                  'ভার্সন v1.0.7 (Build 8)',
                   style: TextStyle(color: LiquidGlassTheme.neonEmerald, fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -1644,6 +1886,16 @@ class _MoreScreenState extends State<MoreScreen> {
                       onTap: () => _showBusinessInfoDialog(context),
                     ),
 
+                    // 3. Theme & Color Customization (NEW!)
+                    _buildMenuCard(
+                      title: 'অ্যাপ থিম ও কালার (App Theme)',
+                      subtitle: 'বর্তমান: ${LiquidGlassTheme.currentPreset.name} • ৬টি আকর্ষণীয় থিম',
+                      icon: Icons.palette_rounded,
+                      color: LiquidGlassTheme.neonEmerald,
+                      badge: LiquidGlassTheme.currentPreset.icon,
+                      onTap: () => _showThemeSelectionDialog(context),
+                    ),
+
                     // 3. Auto SMS & Reminders (UPGRADED!)
                     _buildMenuCard(
                       title: 'অটো এসএমএস ও কিস্তি তাগাদা',
@@ -1681,7 +1933,7 @@ class _MoreScreenState extends State<MoreScreen> {
                     // 6. App About Popup Modal (NEW!)
                     _buildMenuCard(
                       title: 'অ্যাপ পরিচিতি ও সিস্টেম তথ্য',
-                      subtitle: 'ভার্সন v1.0.6 • ডেভেলপার ও সিস্টেম স্পেসিফিকেশন',
+                      subtitle: 'ভার্সন v1.0.7 • ডেভেলপার ও সিস্টেম স্পেসিফিকেশন',
                       icon: Icons.info_outline_rounded,
                       color: LiquidGlassTheme.neonEmerald,
                       onTap: () => _showAboutDialog(context),

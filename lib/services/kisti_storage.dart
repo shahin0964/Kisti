@@ -6,6 +6,7 @@ import '../models/customer.dart';
 import '../models/collection.dart';
 import '../models/expense.dart';
 import '../models/sms_template.dart';
+import '../theme/liquid_glass_theme.dart';
 
 class DailyCollectionGroup {
   final DateTime date;
@@ -42,12 +43,18 @@ class KistiStorage extends ChangeNotifier {
   static const String _keySmsNotice1Days = 'kisti_sms_notice_1_days';
   static const String _keySmsNotice2Days = 'kisti_sms_notice_2_days';
 
+  // Theme Key
+  static const String _keyThemeId = 'kisti_theme_id';
+
   List<Customer> _customers = [];
   List<CollectionRecord> _collections = [];
   List<Expense> _expenses = [];
   bool _isLoaded = false;
   bool _isAutoBackupEnabled = true;
   DateTime? _lastAutoBackupTime;
+
+  // Theme State
+  String _themeId = 'cyber_neon';
 
   // Business Info State
   String _shopName = 'কিস্তি সেবা শো-রুম';
@@ -70,6 +77,9 @@ class KistiStorage extends ChangeNotifier {
   bool get isLoaded => _isLoaded;
   bool get isAutoBackupEnabled => _isAutoBackupEnabled;
   DateTime? get lastAutoBackupTime => _lastAutoBackupTime;
+
+  // Theme Getter
+  String get themeId => _themeId;
 
   // Business Info Getters
   String get shopName => _shopName;
@@ -108,7 +118,7 @@ class KistiStorage extends ChangeNotifier {
     if (customersJson != null) {
       try {
         final List<dynamic> custList = jsonDecode(customersJson);
-        _customers = custList.map((e) => Customer.fromJson(e)).toList();
+        _customers = custList.map((c) => Customer.fromJson(c)).toList();
       } catch (e) {
         _customers = [];
       }
@@ -119,7 +129,7 @@ class KistiStorage extends ChangeNotifier {
     if (collectionsJson != null) {
       try {
         final List<dynamic> colList = jsonDecode(collectionsJson);
-        _collections = colList.map((e) => CollectionRecord.fromJson(e)).toList();
+        _collections = colList.map((c) => CollectionRecord.fromJson(c)).toList();
       } catch (e) {
         _collections = [];
       }
@@ -145,6 +155,10 @@ class KistiStorage extends ChangeNotifier {
       _lastAutoBackupTime = DateTime.tryParse(lastBackupStr);
     }
 
+    // Load Theme State
+    _themeId = prefs.getString(_keyThemeId) ?? 'cyber_neon';
+    LiquidGlassTheme.applyTheme(_themeId);
+
     // Load Business Info
     _shopName = prefs.getString(_keyShopName) ?? 'কিস্তি সেবা শো-রুম';
     _proprietorName = prefs.getString(_keyProprietorName) ?? 'মোঃ শাহিন আলম';
@@ -165,6 +179,14 @@ class KistiStorage extends ChangeNotifier {
 
     // Trigger auto backup check
     await checkAndTriggerDailyAutoBackup();
+  }
+
+  Future<void> setThemeId(String newThemeId) async {
+    _themeId = newThemeId;
+    LiquidGlassTheme.applyTheme(newThemeId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyThemeId, newThemeId);
+    notifyListeners();
   }
 
   Future<void> _saveData() async {

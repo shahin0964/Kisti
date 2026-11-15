@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kisti/models/customer.dart';
 import 'package:kisti/models/expense.dart';
 import 'package:kisti/models/sms_template.dart';
+import 'package:kisti/theme/liquid_glass_theme.dart';
 
 void main() {
   test('Customer product installment calculation smoke test', () {
@@ -70,4 +71,25 @@ void main() {
     expect(paymentTpl.content.contains('{পরিশোধের পরিমাণ}'), true);
     expect(paymentTpl.content.contains('{রশিদ}'), true);
   });
+
+  test('LiquidGlassTheme presets & dynamic applyTheme test', () {
+    expect(LiquidGlassTheme.presets.length, 6);
+    expect(LiquidGlassTheme.presets.map((p) => p.id), containsAll([
+      'cyber_neon',
+      'purple_galaxy',
+      'midnight_ocean',
+      'sunset_gold',
+      'crimson_ruby',
+      'matrix_green',
+    ]));
+
+    LiquidGlassTheme.applyTheme('purple_galaxy');
+    expect(LiquidGlassTheme.currentThemeId, 'purple_galaxy');
+    expect(LiquidGlassTheme.currentPreset.id, 'purple_galaxy');
+
+    // Unknown fallback to cyber_neon
+    LiquidGlassTheme.applyTheme('invalid_theme_xyz');
+    expect(LiquidGlassTheme.currentThemeId, 'cyber_neon');
+  });
 }
+
