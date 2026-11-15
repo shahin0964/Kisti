@@ -821,26 +821,30 @@ class _CustomersScreenState extends State<CustomersScreen> {
   }
 
   Widget _buildInfoCol(String label, String value, {Color? color}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: LiquidGlassTheme.textMuted,
-            fontSize: 10.5,
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: LiquidGlassTheme.textMuted,
+              fontSize: 10.5,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            color: color ?? Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              color: color ?? Colors.white,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

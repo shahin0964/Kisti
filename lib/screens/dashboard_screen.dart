@@ -69,14 +69,15 @@ class DashboardScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'KISTI SEBA',
-                        style: TextStyle(
+                      Text(
+                        storage.shopName.isNotEmpty ? storage.shopName : 'KISTI SEBA',
+                        style: const TextStyle(
                           color: LiquidGlassTheme.neonEmerald,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
+                          letterSpacing: 0.5,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         dateStr,

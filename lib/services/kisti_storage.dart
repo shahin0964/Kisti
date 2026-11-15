@@ -29,14 +29,40 @@ class KistiStorage extends ChangeNotifier {
   static const String _keyAutoSmsEnabled = 'kisti_auto_sms_enabled';
   static const String _keyShopName = 'kisti_shop_name';
 
+  // Business Profile Keys
+  static const String _keyProprietorName = 'kisti_proprietor_name';
+  static const String _keyShopPhone = 'kisti_shop_phone';
+  static const String _keyShopAddress = 'kisti_shop_address';
+  static const String _keyTradeLicense = 'kisti_trade_license';
+  static const String _keyShopSlogan = 'kisti_shop_slogan';
+
+  // Auto SMS Configuration Keys
+  static const String _keySmsSimSlot = 'kisti_sms_sim_slot';
+  static const String _keySmsOnCollection = 'kisti_sms_on_collection';
+  static const String _keySmsNotice1Days = 'kisti_sms_notice_1_days';
+  static const String _keySmsNotice2Days = 'kisti_sms_notice_2_days';
+
   List<Customer> _customers = [];
   List<CollectionRecord> _collections = [];
   List<Expense> _expenses = [];
   bool _isLoaded = false;
   bool _isAutoBackupEnabled = true;
   DateTime? _lastAutoBackupTime;
-  bool _isAutoSmsEnabled = true;
+
+  // Business Info State
   String _shopName = 'কিস্তি সেবা শো-রুম';
+  String _proprietorName = 'মোঃ শাহিন আলম';
+  String _shopPhone = '01700000000';
+  String _shopAddress = 'মিরপুর, ঢাকা - ১২১৬';
+  String _tradeLicense = 'TRD-2026/0964';
+  String _shopSlogan = 'সহজ কিস্তিতে বিশ্বস্ত পণ্য বিক্রয় সেবা';
+
+  // Auto SMS State
+  bool _isAutoSmsEnabled = true;
+  String _smsSimSlot = 'সিম ১ (SIM 1)';
+  bool _smsOnCollection = true;
+  int _smsNotice1Days = 3;
+  int _smsNotice2Days = 1;
 
   List<Customer> get customers => List.unmodifiable(_customers);
   List<CollectionRecord> get collections => List.unmodifiable(_collections);
@@ -44,8 +70,21 @@ class KistiStorage extends ChangeNotifier {
   bool get isLoaded => _isLoaded;
   bool get isAutoBackupEnabled => _isAutoBackupEnabled;
   DateTime? get lastAutoBackupTime => _lastAutoBackupTime;
-  bool get isAutoSmsEnabled => _isAutoSmsEnabled;
+
+  // Business Info Getters
   String get shopName => _shopName;
+  String get proprietorName => _proprietorName;
+  String get shopPhone => _shopPhone;
+  String get shopAddress => _shopAddress;
+  String get tradeLicense => _tradeLicense;
+  String get shopSlogan => _shopSlogan;
+
+  // Auto SMS Getters
+  bool get isAutoSmsEnabled => _isAutoSmsEnabled;
+  String get smsSimSlot => _smsSimSlot;
+  bool get smsOnCollection => _smsOnCollection;
+  int get smsNotice1Days => _smsNotice1Days;
+  int get smsNotice2Days => _smsNotice2Days;
 
   KistiStorage() {
     loadData();
@@ -99,14 +138,27 @@ class KistiStorage extends ChangeNotifier {
       _expenses = [];
     }
 
+    // Load Backup State
     _isAutoBackupEnabled = prefs.getBool(_keyAutoBackupEnabled) ?? true;
-    _isAutoSmsEnabled = prefs.getBool(_keyAutoSmsEnabled) ?? true;
-    _shopName = prefs.getString(_keyShopName) ?? 'কিস্তি সেবা শো-রুম';
-
     final lastBackupStr = prefs.getString(_keyLastAutoBackupTime);
     if (lastBackupStr != null) {
       _lastAutoBackupTime = DateTime.tryParse(lastBackupStr);
     }
+
+    // Load Business Info
+    _shopName = prefs.getString(_keyShopName) ?? 'কিস্তি সেবা শো-রুম';
+    _proprietorName = prefs.getString(_keyProprietorName) ?? 'মোঃ শাহিন আলম';
+    _shopPhone = prefs.getString(_keyShopPhone) ?? '01700000000';
+    _shopAddress = prefs.getString(_keyShopAddress) ?? 'মিরপুর, ঢাকা - ১২১৬';
+    _tradeLicense = prefs.getString(_keyTradeLicense) ?? 'TRD-2026/0964';
+    _shopSlogan = prefs.getString(_keyShopSlogan) ?? 'সহজ কিস্তিতে বিশ্বস্ত পণ্য বিক্রয় সেবা';
+
+    // Load Auto SMS State
+    _isAutoSmsEnabled = prefs.getBool(_keyAutoSmsEnabled) ?? true;
+    _smsSimSlot = prefs.getString(_keySmsSimSlot) ?? 'সিম ১ (SIM 1)';
+    _smsOnCollection = prefs.getBool(_keySmsOnCollection) ?? true;
+    _smsNotice1Days = prefs.getInt(_keySmsNotice1Days) ?? 3;
+    _smsNotice2Days = prefs.getInt(_keySmsNotice2Days) ?? 1;
 
     _isLoaded = true;
     notifyListeners();
@@ -138,14 +190,34 @@ class KistiStorage extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- Settings ---
+  // --- Business Information Settings ---
 
-  Future<void> setAutoBackupEnabled(bool enabled) async {
-    _isAutoBackupEnabled = enabled;
+  Future<void> updateBusinessInfo({
+    required String name,
+    required String proprietor,
+    required String phone,
+    required String address,
+    String tradeLicense = '',
+    String slogan = '',
+  }) async {
+    _shopName = name;
+    _proprietorName = proprietor;
+    _shopPhone = phone;
+    _shopAddress = address;
+    _tradeLicense = tradeLicense;
+    _shopSlogan = slogan;
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyAutoBackupEnabled, enabled);
+    await prefs.setString(_keyShopName, name);
+    await prefs.setString(_keyProprietorName, proprietor);
+    await prefs.setString(_keyShopPhone, phone);
+    await prefs.setString(_keyShopAddress, address);
+    await prefs.setString(_keyTradeLicense, tradeLicense);
+    await prefs.setString(_keyShopSlogan, slogan);
     notifyListeners();
   }
+
+  // --- Auto SMS Configuration Settings ---
 
   Future<void> setAutoSmsEnabled(bool enabled) async {
     _isAutoSmsEnabled = enabled;
@@ -154,24 +226,52 @@ class KistiStorage extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setShopName(String name) async {
-    _shopName = name;
+  Future<void> setSmsSimSlot(String sim) async {
+    _smsSimSlot = sim;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyShopName, name);
+    await prefs.setString(_keySmsSimSlot, sim);
+    notifyListeners();
+  }
+
+  Future<void> setSmsOnCollection(bool value) async {
+    _smsOnCollection = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keySmsOnCollection, value);
+    notifyListeners();
+  }
+
+  Future<void> setSmsNoticeDays({required int firstNoticeDays, required int secondNoticeDays}) async {
+    _smsNotice1Days = firstNoticeDays;
+    _smsNotice2Days = secondNoticeDays;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keySmsNotice1Days, firstNoticeDays);
+    await prefs.setInt(_keySmsNotice2Days, secondNoticeDays);
     notifyListeners();
   }
 
   // --- Offline Auto Backup (11:30 PM Daily) ---
+
+  Future<void> setAutoBackupEnabled(bool enabled) async {
+    _isAutoBackupEnabled = enabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyAutoBackupEnabled, enabled);
+    notifyListeners();
+  }
 
   Future<String> createOfflineBackup() async {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
 
     final backupPayload = {
-      'version': '1.0.4',
+      'version': '1.0.5',
       'backupTimestamp': now.toIso8601String(),
       'type': 'offline_auto_backup',
-      'shopName': _shopName,
+      'business': {
+        'shopName': _shopName,
+        'proprietor': _proprietorName,
+        'phone': _shopPhone,
+        'address': _shopAddress,
+      },
       'stats': {
         'totalCustomers': _customers.length,
         'totalCollections': _collections.length,
@@ -196,8 +296,6 @@ class KistiStorage extends ChangeNotifier {
     if (!_isAutoBackupEnabled) return;
 
     final now = DateTime.now();
-    // Check if 11:30 PM (23:30) condition is met for today
-    // Or if last backup was before today
     bool shouldBackup = false;
     if (_lastAutoBackupTime == null) {
       shouldBackup = true;

@@ -6,6 +6,7 @@ class ReleaseInfo {
   final String tagName;
   final String releaseTitle;
   final String releaseNotes;
+  final String currentReleaseNotes;
   final DateTime? publishedAt;
   final String apkDownloadUrl;
   final int apkSizeBytes;
@@ -16,6 +17,7 @@ class ReleaseInfo {
     required this.tagName,
     required this.releaseTitle,
     required this.releaseNotes,
+    required this.currentReleaseNotes,
     this.publishedAt,
     required this.apkDownloadUrl,
     required this.apkSizeBytes,
@@ -31,12 +33,29 @@ class ReleaseInfo {
 }
 
 class OtaUpdateService {
-  static const String currentVersion = 'v1.0.4';
+  static const String currentVersion = 'v1.0.5';
   static const String repoOwner = 'shahin0964';
   static const String repoName = 'Kisti';
 
+  static const String currentReleaseChangelog = '''
+✨ নতুন কি যোগ হলো (New Features):
+• ব্যবসার তথ্য (Business Info) সেটিংস (দোকানের নাম, মালিকের নাম, মোবাইল, ঠিকানা, স্লোগান)
+• অটো এসএমএস সিস্টেমে সিম সিলেকশন (সিম ১ / সিম ২)
+• কিস্তি জমার পর তাৎক্ষণিক অটো কনফার্মেশন ও ডিজিটাল রসিদ এসএমএস
+• কিস্তির তারিখের পূর্বে ২টি আগাম তাগাদা এসএমএস (৩ দিন ও ১ দিন আগে)
+• অ্যাপ পরিচিতি ও তথ্য (About App) পপআপ মডাল
+
+🛠️ কি কি ফিক্স হলো (Fixes):
+• স্ক্রিনের হেডারের লেখা স্ক্রল হয়ে উপরে হারিয়ে যাওয়ার সমস্যা সমাধান
+• অতিরিক্ত বড় লেখার মাঝে লাইন ভেঙে লম্বাটে হওয়ার সমস্যা সমাধান
+• ডিসপ্লে নিচে ভাসমান মেনুবারের সাথে লেখার ওভারল্যাপ ফিক্স
+
+🚀 কি আপডেট হলো (Improvements):
+• অফলাইন অটো ব্যাকআপ সিস্টেম (প্রতিদিন রাত ১১:৩০ PM)
+• গিটহাব OTA আপডেট ডায়ালগে সবসময় রিলিজ নোট দেখার সুব্যবস্থা
+''';
+
   static int _versionToInt(String version) {
-    // Convert 'v1.0.3' or '1.0.3' to numeric e.g. 10003
     final clean = version.replaceAll(RegExp(r'[^0-9.]'), '');
     final parts = clean.split('.');
     int major = 0;
@@ -59,7 +78,17 @@ class OtaUpdateService {
 
       final response = await request.close();
       if (response.statusCode != 200) {
-        return null;
+        // Return current release info even if offline
+        return const ReleaseInfo(
+          tagName: currentVersion,
+          releaseTitle: 'Kisti Seba $currentVersion',
+          releaseNotes: currentReleaseChangelog,
+          currentReleaseNotes: currentReleaseChangelog,
+          apkDownloadUrl: '',
+          apkSizeBytes: 0,
+          hasUpdate: false,
+          currentVersion: currentVersion,
+        );
       }
 
       final responseBody = await response.transform(utf8.decoder).join();
@@ -67,7 +96,7 @@ class OtaUpdateService {
 
       final tagName = (data['tag_name'] as String?) ?? '';
       final name = (data['name'] as String?) ?? tagName;
-      final body = (data['body'] as String?) ?? 'নতুন পারফরম্যান্স আপডেট ও বাগ ফিক্স।';
+      final body = (data['body'] as String?) ?? currentReleaseChangelog;
       final publishedStr = data['published_at'] as String?;
       DateTime? publishedAt;
       if (publishedStr != null) {
@@ -88,7 +117,6 @@ class OtaUpdateService {
         }
       }
 
-      // Fallback direct url if asset list was empty
       if (apkUrl.isEmpty && tagName.isNotEmpty) {
         apkUrl = 'https://github.com/$repoOwner/$repoName/releases/download/$tagName/app-release.apk';
       }
@@ -100,7 +128,8 @@ class OtaUpdateService {
       return ReleaseInfo(
         tagName: tagName,
         releaseTitle: name,
-        releaseNotes: body,
+        releaseNotes: body.isNotEmpty ? body : currentReleaseChangelog,
+        currentReleaseNotes: currentReleaseChangelog,
         publishedAt: publishedAt,
         apkDownloadUrl: apkUrl,
         apkSizeBytes: apkSize,
@@ -109,7 +138,16 @@ class OtaUpdateService {
       );
     } catch (e) {
       debugPrint('Error checking OTA update: $e');
-      return null;
+      return const ReleaseInfo(
+        tagName: currentVersion,
+        releaseTitle: 'Kisti Seba $currentVersion',
+        releaseNotes: currentReleaseChangelog,
+        currentReleaseNotes: currentReleaseChangelog,
+        apkDownloadUrl: '',
+        apkSizeBytes: 0,
+        hasUpdate: false,
+        currentVersion: currentVersion,
+      );
     }
   }
 
@@ -130,10 +168,9 @@ class OtaUpdateService {
         return null;
       }
 
-      final totalBytes = response.contentLength > 0 ? response.contentLength : 51000000;
+      final totalBytes = response.contentLength > 0 ? response.contentLength : 52000000;
       int receivedBytes = 0;
 
-      // Target path: save to /sdcard/Download if accessible, or system temp
       Directory dir;
       final sdcardDownload = Directory('/sdcard/Download');
       if (sdcardDownload.existsSync()) {
