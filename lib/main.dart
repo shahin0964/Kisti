@@ -36,6 +36,16 @@ class KistiApp extends StatelessWidget {
           title: 'Kisti - কিস্তি সেবা',
           debugShowCheckedModeBanner: false,
           theme: LiquidGlassTheme.darkTheme,
+          builder: (context, child) {
+            final mediaQuery = MediaQuery.of(context);
+            // Global compact DPI scaling for edge-to-edge perfect fit on mobile displays
+            return MediaQuery(
+              data: mediaQuery.copyWith(
+                textScaler: const TextScaler.linear(0.90),
+              ),
+              child: child!,
+            );
+          },
           home: storage.isLoaded
               ? MainScreen(storage: storage)
               : const Scaffold(

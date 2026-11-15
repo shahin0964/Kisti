@@ -66,27 +66,27 @@ class _MainScreenState extends State<MainScreen> {
 
             // Floating Liquid Glass Navigation Bar
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: 20,
+              left: 14,
+              right: 14,
+              bottom: 14,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(26),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
-                    height: 70,
+                    height: 58,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(26),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.20),
-                        width: 1.2,
+                        color: Colors.white.withOpacity(0.18),
+                        width: 1.1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -124,13 +124,13 @@ class _MainScreenState extends State<MainScreen> {
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
               ? LiquidGlassTheme.neonEmerald.withOpacity(0.18)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? Border.all(
                   color: LiquidGlassTheme.neonEmerald.withOpacity(0.45),
@@ -140,8 +140,8 @@ class _MainScreenState extends State<MainScreen> {
           boxShadow: isSelected
               ? LiquidGlassTheme.neonGlow(
                   LiquidGlassTheme.neonEmerald,
-                  intensity: 0.25,
-                  blur: 14,
+                  intensity: 0.22,
+                  blur: 10,
                 )
               : null,
         ),
@@ -150,18 +150,18 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             Icon(
               icon,
-              size: 22,
+              size: 20,
               color: isSelected ? LiquidGlassTheme.neonEmerald : Colors.white60,
             ),
             if (isSelected) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Text(
                 label,
                 style: const TextStyle(
                   color: LiquidGlassTheme.neonEmerald,
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+                  letterSpacing: 0.1,
                 ),
               ),
             ],

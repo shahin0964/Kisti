@@ -865,7 +865,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                       'আর্থিক হিসাব ও অ্যানালিসিস',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1192,7 +1192,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
           children: [
             Expanded(
               child: LiquidGlassButton(
-                text: '+ কিস্তি আদায়',
+                text: 'কিস্তি আদায়',
                 icon: Icons.add_card_rounded,
                 glowColor: LiquidGlassTheme.neonEmerald,
                 onPressed: () => _showCollectSheet(),
@@ -1201,7 +1201,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: LiquidGlassButton(
-                text: '+ খরচ যোগ',
+                text: 'দোকান খরচ যোগ',
                 icon: Icons.post_add_rounded,
                 glowColor: LiquidGlassTheme.sunsetAmber,
                 onPressed: _showAddExpenseSheet,
@@ -1805,10 +1805,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 ],
               ),
               LiquidGlassButton(
-                text: '+ খরচ লিখুন',
+                text: 'খরচ লিখুন',
                 icon: Icons.add,
                 glowColor: LiquidGlassTheme.sunsetAmber,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 onPressed: _showAddExpenseSheet,
               ),
             ],

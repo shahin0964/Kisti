@@ -838,11 +838,11 @@ class _MoreScreenState extends State<MoreScreen> {
 
             return Dialog(
               backgroundColor: Colors.transparent,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
               child: LiquidGlassCard(
-                borderRadius: 24,
+                borderRadius: 20,
                 glowColor: LiquidGlassTheme.electricViolet,
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -851,7 +851,7 @@ class _MoreScreenState extends State<MoreScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: LiquidGlassTheme.electricViolet.withOpacity(0.2),
@@ -860,10 +860,10 @@ class _MoreScreenState extends State<MoreScreen> {
                             child: const Icon(
                               Icons.cloud_sync_rounded,
                               color: LiquidGlassTheme.electricViolet,
-                              size: 24,
+                              size: 22,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -872,7 +872,7 @@ class _MoreScreenState extends State<MoreScreen> {
                                   'অফলাইন অটো ব্যাকআপ',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 17,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -880,25 +880,25 @@ class _MoreScreenState extends State<MoreScreen> {
                                   'প্রতিদিন রাত ১১:৩০ টায় অফলাইন ব্যাকআপ',
                                   style: TextStyle(
                                     color: LiquidGlassTheme.textSecondary,
-                                    fontSize: 11,
+                                    fontSize: 10.5,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white60, size: 20),
+                            icon: const Icon(Icons.close, color: Colors.white60, size: 18),
                             onPressed: () => Navigator.pop(ctx),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
 
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isAutoOn
                                 ? LiquidGlassTheme.neonEmerald.withOpacity(0.3)
@@ -915,7 +915,7 @@ class _MoreScreenState extends State<MoreScreen> {
                                   'প্রতিদিনের অটো ব্যাকআপ',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 13,
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -928,7 +928,7 @@ class _MoreScreenState extends State<MoreScreen> {
                                     color: isAutoOn
                                         ? LiquidGlassTheme.neonEmerald
                                         : Colors.white38,
-                                    fontSize: 11,
+                                    fontSize: 10.5,
                                   ),
                                 ),
                               ],
@@ -945,23 +945,23 @@ class _MoreScreenState extends State<MoreScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
 
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.03),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.white.withOpacity(0.08)),
                         ),
                         child: Column(
                           children: [
                             _buildInfoRow('নির্ধারিত সময়:', 'প্রতিদিন রাত ১১:৩০ PM'),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 5),
                             _buildInfoRow('সর্বশেষ ব্যাকআপ:', lastBackupStr),
-                            const SizedBox(height: 6),
-                            _buildInfoRow('ব্যাকআপ স্টোরেজ:', 'ডিভাইসের নিজস্ব অফলাইন মেমোরি'),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 5),
+                            _buildInfoRow('ব্যাকআপ স্টোরেজ:', 'ডিভাইস লোকাল স্টোরেজ'),
+                            const SizedBox(height: 5),
                             _buildInfoRow(
                               'বর্তমান রেকর্ড:',
                               'গ্রাহক: ${storage.customers.length} | কিস্তি: ${storage.collections.length} | খরচ: ${storage.expenses.length}',
@@ -970,10 +970,10 @@ class _MoreScreenState extends State<MoreScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
 
                       LiquidGlassButton(
-                        text: '📥 এখনই অফলাইন ব্যাকআপ নিন',
+                        text: 'অফলাইন ব্যাকআপ নিন',
                         icon: Icons.save_rounded,
                         glowColor: LiquidGlassTheme.electricViolet,
                         onPressed: () async {
@@ -990,26 +990,26 @@ class _MoreScreenState extends State<MoreScreen> {
                         },
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
 
                       Row(
                         children: [
                           Expanded(
                             child: LiquidGlassButton(
-                              text: '📤 ব্যাকআপ রিস্টোর',
+                              text: 'রিস্টোর করুন',
                               icon: Icons.restore_rounded,
                               isSecondary: true,
-                              height: 46,
+                              height: 40,
                               onPressed: () => _showRestoreDialog(context),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: LiquidGlassButton(
-                              text: '📋 কোড কপি',
+                              text: 'কোড কপি',
                               icon: Icons.copy_rounded,
                               isSecondary: true,
-                              height: 46,
+                              height: 40,
                               onPressed: () async {
                                 final snap = await storage.getSavedOfflineBackup() ??
                                     await storage.createOfflineBackup();
@@ -1637,7 +1637,7 @@ class _MoreScreenState extends State<MoreScreen> {
 
                     // 2. Business Information Card (NEW!)
                     _buildMenuCard(
-                      title: 'ব্যবসার তথ্য (Business Information)',
+                      title: 'ব্যবসার তথ্য ও প্রোফাইল',
                       subtitle: 'দোকান/শোরুমের নাম, প্রোপাইটর, মোবাইল ও ঠিকানা',
                       icon: Icons.store_mall_directory_rounded,
                       color: LiquidGlassTheme.amberGold,
@@ -1680,8 +1680,8 @@ class _MoreScreenState extends State<MoreScreen> {
 
                     // 6. App About Popup Modal (NEW!)
                     _buildMenuCard(
-                      title: 'অ্যাপ পরিচিতি ও তথ্য (About App)',
-                      subtitle: 'ভার্সন v1.0.5 • ডেভেলপার ও সিস্টেম স্পেসিফিকেশন',
+                      title: 'অ্যাপ পরিচিতি ও সিস্টেম তথ্য',
+                      subtitle: 'ভার্সন v1.0.6 • ডেভেলপার ও সিস্টেম স্পেসিফিকেশন',
                       icon: Icons.info_outline_rounded,
                       color: LiquidGlassTheme.neonEmerald,
                       onTap: () => _showAboutDialog(context),
@@ -1792,9 +1792,10 @@ class _MoreScreenState extends State<MoreScreen> {
                         title,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

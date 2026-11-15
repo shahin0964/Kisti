@@ -15,8 +15,8 @@ class LiquidGlassTheme {
   static const Color sunsetAmber = Color(0xFFFF9E00);
   static const Color bgSurfaceElevated = Color(0xFF111A2E);
 
-  // Glassmorphic Opacities
-  static const double glassBlur = 18.0;
+  // Glassmorphic Opacities (Optimized for 60 FPS performance)
+  static const double glassBlur = 10.0;
   static final Color glassFill = Colors.white.withOpacity(0.06);
   static final Color glassFillLighter = Colors.white.withOpacity(0.10);
   static final Color glassBorder = Colors.white.withOpacity(0.18);
@@ -28,7 +28,7 @@ class LiquidGlassTheme {
   static const Color textMuted = Color(0xFF64748B);
 
   // Box Shadows for Neon Glow
-  static List<BoxShadow> neonGlow(Color color, {double intensity = 0.3, double blur = 20.0}) {
+  static List<BoxShadow> neonGlow(Color color, {double intensity = 0.25, double blur = 14.0}) {
     return [
       BoxShadow(
         color: color.withOpacity(intensity),
@@ -42,8 +42,8 @@ class LiquidGlassTheme {
     return [
       BoxShadow(
         color: Colors.black.withOpacity(0.35),
-        blurRadius: 24,
-        offset: const Offset(0, 10),
+        blurRadius: 16,
+        offset: const Offset(0, 6),
       ),
       BoxShadow(
         color: Colors.white.withOpacity(0.03),
@@ -67,27 +67,27 @@ class LiquidGlassTheme {
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: textPrimary,
-          fontSize: 28,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
         headlineMedium: TextStyle(
           color: textPrimary,
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
         titleLarge: TextStyle(
           color: textPrimary,
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
         bodyLarge: TextStyle(
           color: textPrimary,
-          fontSize: 15,
+          fontSize: 14,
         ),
         bodyMedium: TextStyle(
           color: textSecondary,
-          fontSize: 13,
+          fontSize: 12,
         ),
       ),
     );

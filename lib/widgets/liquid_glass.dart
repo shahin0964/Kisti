@@ -146,7 +146,7 @@ class LiquidGlassCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.margin,
-    this.borderRadius = 22.0,
+    this.borderRadius = 18.0,
     this.glowColor,
     this.blur = LiquidGlassTheme.glassBlur,
     this.onTap,
@@ -156,29 +156,29 @@ class LiquidGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget cardContent = Container(
-      padding: padding ?? const EdgeInsets.all(18),
+      padding: padding ?? const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            customGlassColor ?? Colors.white.withOpacity(0.09),
+            customGlassColor ?? Colors.white.withOpacity(0.08),
             customGlassColor?.withOpacity(0.5) ?? Colors.white.withOpacity(0.03),
           ],
         ),
         border: Border.all(
-          width: 1.2,
+          width: 1.1,
           color: glowColor != null
               ? glowColor!.withOpacity(0.35)
-              : Colors.white.withOpacity(0.18),
+              : Colors.white.withOpacity(0.16),
         ),
         boxShadow: [
           ...LiquidGlassTheme.glassShadow(),
           if (glowColor != null)
             BoxShadow(
               color: glowColor!.withOpacity(0.15),
-              blurRadius: 28,
+              blurRadius: 18,
               spreadRadius: -4,
             ),
         ],
@@ -187,7 +187,7 @@ class LiquidGlassCard extends StatelessWidget {
     );
 
     return Container(
-      margin: margin ?? const EdgeInsets.symmetric(vertical: 8),
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 6),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(
@@ -229,7 +229,7 @@ class LiquidButton extends StatelessWidget {
     required this.onPressed,
     this.glowColor = LiquidGlassTheme.neonEmerald,
     this.isSecondary = false,
-    this.height = 52.0,
+    this.height = 44.0,
     this.width,
     this.padding,
   });
@@ -240,73 +240,74 @@ class LiquidButton extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: isSecondary
             ? []
             : [
                 BoxShadow(
-                  color: glowColor.withOpacity(0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 4),
+                  color: glowColor.withOpacity(0.30),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
               ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onPressed,
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: padding ?? const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: isSecondary
-                      ? LinearGradient(
-                          colors: [
-                            Colors.white.withOpacity(0.08),
-                            Colors.white.withOpacity(0.03),
-                          ],
-                        )
-                      : LinearGradient(
-                          colors: [
-                            glowColor,
-                            glowColor,
-                          ],
-                        ),
-                  border: Border.all(
-                    color: isSecondary
-                        ? Colors.white.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.4),
-                    width: 1.2,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(
-                        icon,
-                        size: 20,
-                        color: isSecondary ? Colors.white : Colors.black,
+        borderRadius: BorderRadius.circular(14),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: padding ?? const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                gradient: isSecondary
+                    ? LinearGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.09),
+                          Colors.white.withOpacity(0.04),
+                        ],
+                      )
+                    : LinearGradient(
+                        colors: [
+                          glowColor,
+                          glowColor,
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
+                border: Border.all(
+                  color: isSecondary
+                      ? Colors.white.withOpacity(0.18)
+                      : Colors.white.withOpacity(0.35),
+                  width: 1.1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Icon(
+                      icon,
+                      size: 16,
+                      color: isSecondary ? Colors.white : Colors.black,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Flexible(
+                    child: Text(
                       text,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: TextStyle(
                         color: isSecondary ? Colors.white : Colors.black,
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        letterSpacing: 0.2,
+                        fontSize: 12.5,
+                        letterSpacing: 0.1,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
