@@ -95,7 +95,7 @@ class _MainScreenState extends State<MainScreen> {
                       children: [
                         _buildNavItem(0, Icons.dashboard_rounded, 'ড্যাশবোর্ড'),
                         _buildNavItem(1, Icons.people_alt_rounded, 'গ্রাহক'),
-                        _buildNavItem(2, Icons.account_balance_wallet_rounded, 'আদায়'),
+                        _buildNavItem(2, Icons.analytics_rounded, 'হিসাব'),
                         _buildNavItem(3, Icons.grid_view_rounded, 'অন্যান্য'),
                       ],
                     ),

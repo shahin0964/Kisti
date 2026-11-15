@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kisti/models/customer.dart';
+import 'package:kisti/models/expense.dart';
 
 void main() {
   test('Customer product installment calculation smoke test', () {
@@ -32,5 +33,26 @@ void main() {
     expect(customer.progressPercentage, closeTo(0.555, 0.001));
     expect(customer.isFullyPaid, false);
     expect(customer.categoryIcon, '🧊');
+  });
+
+  test('Expense model serialization & categorization test', () {
+    final expense = Expense(
+      id: 'EXP-12345',
+      title: 'দোকান ভাড়া নভেম্বর',
+      category: 'দোকান ভাড়া',
+      amount: 15000,
+      date: DateTime.parse('2026-11-15T10:00:00Z'),
+      note: 'মালিককে পরিশোধিত',
+    );
+
+    expect(expense.amount, 15000);
+    expect(expense.categoryIcon, '🏢');
+
+    final json = expense.toJson();
+    final reconstructed = Expense.fromJson(json);
+    expect(reconstructed.id, 'EXP-12345');
+    expect(reconstructed.title, 'দোকান ভাড়া নভেম্বর');
+    expect(reconstructed.category, 'দোকান ভাড়া');
+    expect(reconstructed.amount, 15000);
   });
 }

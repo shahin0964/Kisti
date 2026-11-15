@@ -12,6 +12,8 @@ class LiquidGlassTheme {
   static const Color electricViolet = Color(0xFFA855F7);
   static const Color sunsetCoral = Color(0xFFFF4D6D);
   static const Color amberGold = Color(0xFFFFB703);
+  static const Color sunsetAmber = Color(0xFFFF9E00);
+  static const Color bgSurfaceElevated = Color(0xFF111A2E);
 
   // Glassmorphic Opacities
   static const double glassBlur = 18.0;

@@ -220,6 +220,7 @@ class LiquidButton extends StatelessWidget {
   final bool isSecondary;
   final double height;
   final double? width;
+  final EdgeInsetsGeometry? padding;
 
   const LiquidButton({
     super.key,
@@ -230,6 +231,7 @@ class LiquidButton extends StatelessWidget {
     this.isSecondary = false,
     this.height = 52.0,
     this.width,
+    this.padding,
   });
 
   @override
@@ -259,7 +261,7 @@ class LiquidButton extends StatelessWidget {
               onTap: onPressed,
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: padding ?? const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: isSecondary
@@ -442,3 +444,5 @@ class LiquidTextField extends StatelessWidget {
     );
   }
 }
+
+typedef LiquidGlassButton = LiquidButton;
