@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kisti/models/customer.dart';
 import 'package:kisti/models/expense.dart';
+import 'package:kisti/models/sms_template.dart';
 
 void main() {
   test('Customer product installment calculation smoke test', () {
@@ -54,5 +55,19 @@ void main() {
     expect(reconstructed.title, 'দোকান ভাড়া নভেম্বর');
     expect(reconstructed.category, 'দোকান ভাড়া');
     expect(reconstructed.amount, 15000);
+  });
+
+  test('SmsTemplate default templates verification test', () {
+    final templates = SmsTemplate.defaultTemplates;
+    expect(templates.length, greaterThanOrEqualTo(5));
+
+    final dueTpl = templates.firstWhere((t) => t.id == 'due_reminder');
+    expect(dueTpl.content.contains('{গ্রাহকের নাম}'), true);
+    expect(dueTpl.content.contains('{পণ্যের নাম}'), true);
+    expect(dueTpl.content.contains('{কিস্তির পরিমাণ}'), true);
+
+    final paymentTpl = templates.firstWhere((t) => t.id == 'payment_received');
+    expect(paymentTpl.content.contains('{পরিশোধের পরিমাণ}'), true);
+    expect(paymentTpl.content.contains('{রশিদ}'), true);
   });
 }
